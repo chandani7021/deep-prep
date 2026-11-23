@@ -203,7 +203,8 @@ function NextUp({ pos, go }) {
   const sd = has('sd') && (SD_PROBLEMS.find((p) => wk(p.id) <= week && !(state.sdProblems[p.id]?.count > 0)) || SD_PROBLEMS.find((p) => !(state.sdProblems[p.id]?.count > 0)))
   const aiTopic = has('ai') && AI_SECTIONS.flatMap((s) => s.topics.map(([id, name]) => ({ id, name, section: s.name }))).find((t) => !state.aiTopics[t.id])
   const opsTopic = has('ops') && CURRICULUM.ops.filter((m) => wk(m.id) <= week).flatMap((m) => m.topics.map(([id, name]) => ({ id, name, section: m.title }))).find((t) => !state.opsTopics?.[t.id])
-  const mine = (r) => r.must && has(r.track)
+  const productTopic = has('product') && CURRICULUM.product.filter((m) => wk(m.id) <= week).flatMap((m) => m.topics.map(([id, name]) => ({ id, name, section: m.title }))).find((t) => !state.productTopics?.[t.id])
+  const mine = (r) => r.must && (has(r.track) || r.track === 'craft')
   const reading = RESOURCES.find((r) => mine(r) && state.resources[r.id]?.current > 0 && !state.resources[r.id]?.done)
     || RESOURCES.find((r) => mine(r) && !state.resources[r.id]?.current)
 
@@ -239,6 +240,11 @@ function NextUp({ pos, go }) {
         {opsTopic && (
           <button className="task" style={{ textAlign: 'left', width: '100%' }} onClick={() => go('devops')}>
             <div className="task-body"><span className="small" style={{ color: 'var(--c-ops)', fontWeight: 600 }}>DevOps · {opsTopic.section}</span><div className="task-label">{opsTopic.name}</div></div>
+          </button>
+        )}
+        {productTopic && (
+          <button className="task" style={{ textAlign: 'left', width: '100%' }} onClick={() => go('product')}>
+            <div className="task-body"><span className="small" style={{ color: 'var(--c-product)', fontWeight: 600 }}>Product thinking · {productTopic.section}</span><div className="task-label">{productTopic.name}</div></div>
           </button>
         )}
         {reading && (

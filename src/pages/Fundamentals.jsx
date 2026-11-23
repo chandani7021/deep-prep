@@ -1,4 +1,5 @@
-import { FUND_SECTIONS, STORY_PROMPTS } from '../data/content.js'
+import { ExternalLink } from 'lucide-react'
+import { FUND_SECTIONS, RESOURCES, STORY_PROMPTS } from '../data/content.js'
 import { useStore } from '../store.jsx'
 import { Ring } from '../components/ui.jsx'
 import TopicGrid from '../components/TopicGrid.jsx'
@@ -6,7 +7,7 @@ import ModuleList from '../components/Modules.jsx'
 
 const FIELDS = [['s', 'Situation'], ['t', 'Task'], ['a', 'Action (what you did, specifically)'], ['r', 'Result (numbers if you have them)']]
 
-export default function Fundamentals() {
+export default function Fundamentals({ go }) {
   const { state, act } = useStore()
   const all = FUND_SECTIONS.flatMap((s) => s.topics)
   const done = all.filter(([id]) => state.fundTopics[id]).length
@@ -30,6 +31,22 @@ export default function Fundamentals() {
       </div>
 
       <ModuleList track="fund" />
+
+      <section className="panel">
+        <div className="panel-head">
+          <div><h2>Books that make your fundamentals strong</h2><p className="muted small">Start with the “Must” ones. Read a chapter a week alongside the plan; track progress in the Library.</p></div>
+          <button className="btn sm ghost" onClick={() => go('library')}>Library</button>
+        </div>
+        {RESOURCES.filter((r) => r.track === 'craft' || (r.track === 'fund' && r.type === 'Book')).map((r) => (
+          <div key={r.id} className="row" style={{ padding: '8px 0', borderTop: '1px solid var(--line)' }}>
+            <div style={{ flex: 1, minWidth: 200 }}>
+              {r.url ? <a href={r.url} target="_blank" rel="noreferrer" style={{ fontWeight: 600 }}>{r.title} <ExternalLink size={12} /></a> : <span style={{ fontWeight: 600 }}>{r.title}</span>}
+              <div className="small dim">{r.author} · {r.why}</div>
+            </div>
+            {r.must && <span className="chip must">Must</span>}
+          </div>
+        ))}
+      </section>
 
       {FUND_SECTIONS.map((s) => (
         <section key={s.id} className="panel">

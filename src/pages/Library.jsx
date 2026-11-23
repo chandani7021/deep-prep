@@ -4,7 +4,7 @@ import { RESOURCES, TRACKS } from '../data/content.js'
 import { celebrate, useStore } from '../store.jsx'
 import { Progress } from '../components/ui.jsx'
 
-const FILTERS = [['all', 'All'], ['dsa', 'DSA'], ['sd', 'System design'], ['ai', 'AI/ML'], ['ops', 'DevOps'], ['fund', 'Fundamentals'], ['trend', 'Trending tech']]
+const FILTERS = [['all', 'All'], ['craft', 'Developer craft'], ['current', 'Stay current'], ['dsa', 'DSA'], ['sd', 'System design'], ['ai', 'AI/ML'], ['ops', 'DevOps'], ['product', 'Product'], ['fund', 'Fundamentals'], ['trend', 'Trending tech']]
 
 export default function Library() {
   const { state } = useStore()

@@ -5,15 +5,16 @@ const STUDY_BLOCKS = {
   sd: { id: 'sd', label: 'System design: read + one-page summary', detail: 'This week’s module. Write it in your own words with a rough diagram.', xp: 30, track: 'sd', mins: 60 },
   ai: { id: 'ai', label: 'AI/ML: study or project work', detail: 'This week’s module: course videos, reading, or building.', xp: 30, track: 'ai', mins: 60 },
   ops: { id: 'ops', label: 'DevOps: study + hands-on lab', detail: 'This week’s module. Build something small: a workflow, a Dockerfile, a migration.', xp: 30, track: 'ops', mins: 60 },
+  product: { id: 'product', label: 'Product thinking: one idea, applied', detail: 'This week’s module. Apply it to something you built or use every day.', xp: 25, track: 'product', mins: 30 },
   fund: { id: 'fund', label: 'Fundamentals: one topic, deep', detail: 'This week’s module. Explain it out loud when you are done.', xp: 30, track: 'fund', mins: 45 },
 }
 const DSA_TASK = { id: 'dsa', label: 'Solve today’s DSA problems', detail: 'Pattern of the week. 25 min per problem, then study the solution and mark it for review.', xp: 40, track: 'dsa', mins: 60 }
 const TALK_TASK = { id: 'talk', label: 'Explain one solution out loud', detail: 'Two minutes, as if to an interviewer. Communication is a skill too.', xp: 10, track: 'dsa', mins: 5 }
 
 /** Daily tasks for a date, built from the areas in your plan (0 = Sunday ... 6 = Saturday). */
-export const tasksForDay = (date, tracks = ['dsa', 'sd', 'ai', 'ops', 'fund']) => {
+export const tasksForDay = (date, tracks = ['dsa', 'sd', 'ai', 'ops', 'product', 'fund']) => {
   const has = (t) => tracks.includes(t)
-  const others = ['sd', 'ai', 'ops', 'fund'].filter(has)
+  const others = ['sd', 'ai', 'ops', 'product', 'fund'].filter(has)
   const d = date.getDay()
   if (d === 6) {
     const project = has('ai') && has('ops') ? 'AI project or DevOps lab (2 h)' : has('ai') ? 'AI project work (2 h)' : has('ops') ? 'DevOps hands-on lab (2 h)' : 'CS fundamentals deep dive (2 h)'
@@ -28,6 +29,7 @@ export const tasksForDay = (date, tracks = ['dsa', 'sd', 'ai', 'ops', 'fund']) =
       has('dsa') && { id: 'resolve', label: 'Re-solve problems you got stuck on', detail: 'Clear your review queue first.', xp: 40, track: 'dsa', mins: 60 },
       { id: 'review', label: 'Weekly review', detail: 'Write what went well and what is weak on the Roadmap page.', xp: 30, track: 'plan', mins: 60 },
       { id: 'catchup', label: 'Catch-up (1 h)', detail: 'Whatever is behind. Then take the rest of the day off.', xp: 30, track: has('fund') ? 'fund' : 'plan', mins: 60 },
+      { id: 'current', label: 'Stay current: 20 minutes of reading', detail: 'Skim one newsletter or the Tech Radar (Library → Stay current). Note one thing worth trying.', xp: 15, track: 'current', mins: 20 },
     ].filter(Boolean)
   }
   // Weekdays: DSA every day, plus two study blocks that rotate through your other areas.
@@ -76,6 +78,37 @@ export const RESOURCES = [
   { id: 'evodb', title: 'Evolutionary Database Design', author: 'Martin Fowler & Pramod Sadalage', type: 'Article', track: 'ops', must: true, url: 'https://martinfowler.com/articles/evodb.html', unit: 'percent', total: 100, why: 'Free. How to version and migrate schemas safely alongside code.' },
   { id: 'devops-roadmap', title: 'DevOps roadmap', author: 'roadmap.sh', type: 'Site', track: 'ops', must: false, url: 'https://roadmap.sh/devops', unit: 'percent', total: 100, why: 'A map of the whole field with free links per topic. Use it to spot gaps.' },
 
+  // Developer craft: books that make your fundamentals strong
+  { id: 'pragprog', title: 'The Pragmatic Programmer (20th anniversary ed.)', author: 'David Thomas & Andrew Hunt', type: 'Book', track: 'craft', must: true, url: 'https://pragprog.com/titles/tpp20/the-pragmatic-programmer-20th-anniversary-edition/', unit: 'chapters', total: 9, why: 'The habits of an effective developer: DRY, orthogonality, tracer bullets, debugging. Read it first.' },
+  { id: 'missing-semester', title: 'The Missing Semester of Your CS Education', author: 'MIT', type: 'Course', track: 'craft', must: true, url: 'https://missing.csail.mit.edu/', unit: 'lessons', total: 11, why: 'Free. Shell, Vim, git, debugging, profiling: the tools every developer uses but nobody teaches.' },
+  { id: 'refactoring', title: 'Refactoring (2nd ed.)', author: 'Martin Fowler', type: 'Book', track: 'craft', must: true, url: 'https://martinfowler.com/books/refactoring.html', unit: 'chapters', total: 12, why: 'How to improve code safely in small steps. The catalog is a shared vocabulary for code review.' },
+  { id: 'csapp', title: 'Computer Systems: A Programmer’s Perspective (3rd ed.)', author: 'Bryant & O’Hallaron', type: 'Book', track: 'craft', must: false, url: 'https://csapp.cs.cmu.edu/', unit: 'chapters', total: 12, why: 'How code really runs: memory, caches, linking, processes, concurrency. The deepest fundamentals book here.' },
+  { id: 'fsa', title: 'Fundamentals of Software Architecture (2nd ed.)', author: 'Mark Richards & Neal Ford', type: 'Book', track: 'craft', must: true, url: 'https://www.oreilly.com/library/view/fundamentals-of-software/9781098175504/', unit: 'chapters', total: 27, why: 'Architecture styles, characteristics and trade-offs. Bridges code design and system design.' },
+  { id: 'tdd-beck', title: 'Test-Driven Development: By Example', author: 'Kent Beck', type: 'Book', track: 'craft', must: false, url: '', unit: 'chapters', total: 32, why: 'Short and practical. Changes how you design code, not just how you test it.' },
+  { id: 'tidy-first', title: 'Tidy First?', author: 'Kent Beck', type: 'Book', track: 'craft', must: false, url: 'https://www.oreilly.com/library/view/tidy-first/9781098151232/', unit: 'chapters', total: 33, why: 'A short, modern take on small design improvements and when they are worth it.' },
+  { id: 'legacy-code', title: 'Working Effectively with Legacy Code', author: 'Michael Feathers', type: 'Book', track: 'craft', must: false, url: '', unit: 'chapters', total: 25, why: 'How to get untested code under test and change it safely. The reality of most jobs.' },
+  { id: 'release-it', title: 'Release It! (2nd ed.)', author: 'Michael Nygard', type: 'Book', track: 'craft', must: false, url: 'https://pragprog.com/titles/mnee2/release-it-second-edition/', unit: 'chapters', total: 17, why: 'Stability patterns from real outages: timeouts, circuit breakers, bulkheads. Great for system design depth.' },
+  { id: 'code-complete', title: 'Code Complete (2nd ed.)', author: 'Steve McConnell', type: 'Book', track: 'craft', must: false, url: '', unit: 'chapters', total: 35, why: 'The encyclopedia of construction: naming, routines, defensive programming. Dip into chapters as needed.' },
+  { id: 'staff-path', title: 'The Staff Engineer’s Path', author: 'Tanya Reilly', type: 'Book', track: 'craft', must: false, url: 'https://www.oreilly.com/library/view/the-staff-engineers/9781098118723/', unit: 'chapters', total: 9, why: 'For senior roles: big-picture thinking, executing projects, leveling up others.' },
+
+  // Stay current: build a 20-minute weekly habit
+  { id: 'tech-radar', title: 'Thoughtworks Technology Radar', author: 'Thoughtworks', type: 'Site', track: 'current', must: true, url: 'https://www.thoughtworks.com/radar', unit: 'issues', total: 2, why: 'Twice a year: which tools, techniques and platforms to adopt, trial, assess or hold.' },
+  { id: 'pragmatic-engineer', title: 'The Pragmatic Engineer', author: 'Gergely Orosz', type: 'Newsletter', track: 'current', must: true, url: 'https://newsletter.pragmaticengineer.com/', unit: 'issues', total: 26, why: 'How big tech and startups actually build software, plus the job market.' },
+  { id: 'bytebytego-news', title: 'ByteByteGo newsletter', author: 'Alex Xu', type: 'Newsletter', track: 'current', must: false, url: 'https://blog.bytebytego.com/', unit: 'issues', total: 26, why: 'Weekly system design explainers with clear diagrams. Doubles as interview prep.' },
+  { id: 'simon-willison', title: 'Simon Willison’s Weblog', author: 'Simon Willison', type: 'Site', track: 'current', must: false, url: 'https://simonwillison.net/', unit: 'issues', total: 26, why: 'The best running commentary on practical AI engineering and LLM tools.' },
+  { id: 'infoq', title: 'InfoQ', author: 'InfoQ', type: 'Site', track: 'current', must: false, url: 'https://www.infoq.com/', unit: 'issues', total: 26, why: 'Talks and articles on architecture, cloud and engineering culture from practitioners.' },
+  { id: 'hacker-news', title: 'Hacker News', author: 'Y Combinator', type: 'Site', track: 'current', must: false, url: 'https://news.ycombinator.com/', unit: 'issues', total: 26, why: 'Skim the front page weekly; read comments for the real debate. Time-box it.' },
+
+  // Product thinking
+  { id: 'inspired', title: 'Inspired (2nd ed.)', author: 'Marty Cagan', type: 'Book', track: 'product', must: true, url: 'https://www.svpg.com/books/inspired-how-to-create-tech-products-customers-love-2nd-edition/', unit: 'chapters', total: 67, why: 'How strong product teams work and what engineers bring to discovery. Short chapters.' },
+  { id: 'mom-test', title: 'The Mom Test', author: 'Rob Fitzpatrick', type: 'Book', track: 'product', must: true, url: 'https://www.momtestbook.com/', unit: 'chapters', total: 8, why: 'A 2-hour read on talking to users without fooling yourself.' },
+  { id: 'product-minded', title: 'The Product-Minded Software Engineer', author: 'Gergely Orosz', type: 'Article', track: 'product', must: true, url: 'https://blog.pragmaticengineer.com/the-product-minded-engineer/', unit: 'percent', total: 100, why: 'Free. The nine traits of engineers who think about product. Use it as a checklist.' },
+  { id: 'shape-up', title: 'Shape Up', author: 'Ryan Singer (Basecamp)', type: 'Book', track: 'product', must: false, url: 'https://basecamp.com/shapeup', unit: 'chapters', total: 16, why: 'Free online. Appetite, shaping and scope hammering: how to ship the valuable part.' },
+  { id: 'cdh', title: 'Continuous Discovery Habits', author: 'Teresa Torres', type: 'Book', track: 'product', must: false, url: 'https://www.producttalk.org/continuous-discovery-habits/', unit: 'chapters', total: 14, why: 'Weekly user touchpoints and opportunity solution trees.' },
+  { id: 'build-trap', title: 'Escaping the Build Trap', author: 'Melissa Perri', type: 'Book', track: 'product', must: false, url: 'https://melissaperri.com/book', unit: 'chapters', total: 25, why: 'Outcomes over output: why shipping features is not the goal.' },
+  { id: 'lean-analytics', title: 'Lean Analytics', author: 'Alistair Croll & Benjamin Yoskovitz', type: 'Book', track: 'product', must: false, url: 'https://leananalyticsbook.com/', unit: 'chapters', total: 30, why: 'Which metric matters at which stage, with benchmarks by business model.' },
+  { id: 'kohavi', title: 'Trustworthy Online Controlled Experiments', author: 'Kohavi, Tang & Xu', type: 'Book', track: 'product', must: false, url: 'https://experimentguide.com/', unit: 'chapters', total: 23, why: 'The A/B testing book, from the people who ran experimentation at Microsoft, Google and LinkedIn.' },
+
   // Trending technologies
   { id: 'mcp-docs', title: 'Model Context Protocol', tech: 'AI agents & MCP', author: 'modelcontextprotocol.io', type: 'Site', track: 'trend', must: false, url: 'https://modelcontextprotocol.io/', unit: 'percent', total: 100, why: 'The open standard for connecting LLM apps to tools and data. Build one small MCP server.' },
   { id: 'effective-agents', title: 'Building effective agents', tech: 'AI agents & MCP', author: 'Anthropic', type: 'Article', track: 'trend', must: false, url: 'https://www.anthropic.com/engineering/building-effective-agents', unit: 'percent', total: 100, why: 'The clearest guide to agent patterns: workflows vs agents, routing, orchestrator-workers.' },
@@ -106,6 +139,9 @@ export const TRACKS = {
   ai: { name: 'AI/ML', color: 'var(--c-ai)' },
   fund: { name: 'Fundamentals', color: 'var(--c-fund)' },
   ops: { name: 'DevOps', color: 'var(--c-ops)' },
+  product: { name: 'Product thinking', color: 'var(--c-product)' },
+  craft: { name: 'Developer craft', color: 'var(--c-craft)' },
+  current: { name: 'Stay current', color: 'var(--c-current)' },
   trend: { name: 'Trending tech', color: 'var(--c-trend)' },
   plan: { name: 'Planning', color: 'var(--muted)' },
 }
@@ -291,6 +327,7 @@ export const STORY_PROMPTS = [
   { id: 'ownership', q: 'Going beyond your role / ownership' },
   { id: 'ambiguity', q: 'Working through an ambiguous problem' },
   { id: 'helping', q: 'Helping or mentoring someone' },
+  { id: 'product', q: 'A product or user-facing decision you influenced (with the metric that moved)' },
 ]
 
 // ---------------------------------------------------------------------------

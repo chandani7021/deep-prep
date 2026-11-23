@@ -5,7 +5,7 @@ import { Check, Ring, Stars } from '../components/ui.jsx'
 import ModuleList from '../components/Modules.jsx'
 
 const FRAMEWORK = [
-  ['Clarify requirements', 'Functional and non-functional. Ask about scale, latency, consistency. 5 min.'],
+  ['Clarify users and requirements', 'Who are the users and what problem are we solving? What does success look like (one metric)? Then functional and non-functional: scale, latency, consistency. 5 min.'],
   ['Estimate', 'Users, QPS, storage, bandwidth. Only what changes the design.'],
   ['API', 'The main endpoints with inputs and outputs.'],
   ['Data model', 'Entities, access patterns, which database and why.'],

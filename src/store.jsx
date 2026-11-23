@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
 import confetti from 'canvas-confetti'
 import { LEVELS, OPS_MILESTONES, PROJECT_MILESTONES, STORY_PROMPTS, RESOURCES } from './data/content.js'
-import { AREA_IDS, planFor } from './data/curriculum.js'
+import { AREA_IDS, CURRICULUM, planFor } from './data/curriculum.js'
 import { PATTERNS, ALL_PROBLEMS } from './data/problems.js'
 import { connect as connectToGist, pull as pullGist, push as pushGist, readGistConfig, writeGistConfig } from './sync.js'
 
@@ -30,7 +30,7 @@ export const prettyDate = (k, opts = { month: 'short', day: 'numeric' }) => pars
 // ---------------------------------------------------------------- defaults
 const defaultState = () => ({
   version: 1,
-  profile: { name: '', startDate: dayKey(), dailyProblems: 2, dsaMode: 'patterns', planDays: 90, tracks: [...AREA_IDS], planSet: false },
+  profile: { name: '', startDate: dayKey(), dailyProblems: 2, dsaMode: 'patterns', planDays: 90, tracks: [...AREA_IDS], areasSeen: [...AREA_IDS], planSet: false },
   xp: 0,
   xpLog: [],
   activity: {}, // dayKey -> xp earned that day
@@ -46,6 +46,7 @@ const defaultState = () => ({
   fundTopics: {},
   opsTopics: {},
   opsProject: {},
+  productTopics: {},
   stories: {},
   mocks: [],
   weeks: {}, // n -> { goals: {track:true}, reflection: '' }
@@ -62,6 +63,11 @@ const normalize = (parsed) => {
   if (!parsed || typeof parsed !== 'object') return base
   const profile = { ...base.profile, ...(parsed.profile || {}) }
   if (!Array.isArray(profile.tracks) || !profile.tracks.some((t) => AREA_IDS.includes(t))) profile.tracks = [...AREA_IDS]
+  // Areas added in an app update join your plan once; you can remove them on the Roadmap.
+  const seen = Array.isArray(parsed.profile?.areasSeen) ? parsed.profile.areasSeen : ['dsa', 'sd', 'ai', 'ops', 'fund']
+  const added = AREA_IDS.filter((a) => !seen.includes(a) && !profile.tracks.includes(a))
+  if (added.length) profile.tracks = [...profile.tracks, ...added]
+  profile.areasSeen = [...AREA_IDS]
   return { ...base, ...parsed, profile }
 }
 
@@ -166,8 +172,9 @@ export const BADGES = [
   { id: 'review-20', name: 'Memory keeper', desc: 'Complete 20 spaced reviews', icon: '🧠', test: (s) => s.reviews >= 20 },
   { id: 'focus-10', name: 'Deep focus', desc: 'Complete 10 focus sessions', icon: '⏱️', test: (s) => s.focus >= 10 },
   { id: 'ops-project', name: 'Pipeline pro', desc: 'Finish every DevOps project milestone', icon: '🛠️', test: (s) => s.opsProjectDone },
+  { id: 'product-all', name: 'Product minded', desc: 'Check off every product thinking topic', icon: '🎯', test: (s) => s.productDone },
   { id: 'project', name: 'Shipped it', desc: 'Finish every AI project milestone', icon: '🚀', test: (s) => s.projectDone },
-  { id: 'stories', name: 'Storyteller', desc: 'Write all 8 STAR stories', icon: '🗣️', test: (s) => s.stories >= STORY_PROMPTS.length },
+  { id: 'stories', name: 'Storyteller', desc: 'Write every STAR story', icon: '🗣️', test: (s) => s.stories >= STORY_PROMPTS.length },
   { id: 'level-5', name: 'Twilight diver', desc: 'Reach the Twilight zone', icon: '🌒', test: (s) => s.level >= 5 },
   { id: 'level-9', name: 'Challenger Deep', desc: 'Reach the deepest level', icon: '🌑', test: (s) => s.level >= 9 },
 ]
@@ -191,6 +198,7 @@ export const computeStats = (state) => {
     focus: state.focusSessions,
     projectDone: PROJECT_MILESTONES.every((m) => state.project[m.id]),
     opsProjectDone: OPS_MILESTONES.every((m) => state.opsProject?.[m.id]),
+    productDone: CURRICULUM.product.flatMap((m) => m.topics).every(([id]) => state.productTopics?.[id]),
     stories: STORY_PROMPTS.filter((p) => {
       const s = state.stories[p.id]
       return s && s.s && s.a && s.r

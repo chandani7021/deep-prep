@@ -21,6 +21,9 @@
   --c-fund: #4fc3c7;
   --c-ops: #ffb37a;
   --c-trend: #e59bff;
+  --c-product: #a7e86f;
+  --c-craft: #f2d17a;
+  --c-current: #8fd0ff;
   --font-display: 'Bricolage Grotesque', 'Segoe UI', system-ui, sans-serif;
   --font-body: 'IBM Plex Sans', 'Segoe UI', system-ui, -apple-system, sans-serif;
   color-scheme: dark;

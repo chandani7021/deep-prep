@@ -19,6 +19,7 @@ export const AREAS = [
   { id: 'sd', name: 'System design', blurb: 'Building blocks, then 16 full designs out loud' },
   { id: 'ai', name: 'AI/ML', blurb: 'Classic ML → deep learning → LLM apps, plus a RAG project' },
   { id: 'ops', name: 'DevOps & delivery', blurb: 'CI/CD, deployment, Kubernetes, IaC, database DevOps' },
+  { id: 'product', name: 'Product thinking', blurb: 'Users, metrics, experiments, prioritization, product sense' },
   { id: 'fund', name: 'Fundamentals', blurb: 'Networking, OS, databases, code design, behavioral' },
 ]
 export const AREA_IDS = AREAS.map((a) => a.id)
@@ -403,6 +404,88 @@ export const CURRICULUM = {
     },
   ],
 
+  // ------------------------------------------------------------------ Product thinking
+  product: [
+    {
+      id: 'product-1', title: 'Users, problems & jobs to be done', hours: 4,
+      outcome: 'Describe any feature as a user problem with a measurable outcome, not as a solution.',
+      topics: [
+        ['pm-problem', 'Problem space vs solution space'],
+        ['pm-jtbd', 'Jobs to be done: what is the user “hiring” the product for?'],
+        ['pm-users', 'Users vs customers vs buyers; segments and personas'],
+        ['pm-engineer', 'What a product-minded engineer does differently'],
+        ['pm-value', 'Value, usability, feasibility and viability risks'],
+      ],
+      practice: 'Pick a feature you built at work. Rewrite it as: who has the problem, how they solve it today, and how you would know it worked.',
+      links: [['The product-minded software engineer (Gergely Orosz)', 'https://blog.pragmaticengineer.com/the-product-minded-engineer/'], ['Inspired (Marty Cagan)', 'https://www.svpg.com/books/inspired-how-to-create-tech-products-customers-love-2nd-edition/']],
+    },
+    {
+      id: 'product-2', title: 'Discovery & talking to users', hours: 4,
+      outcome: 'Run a user interview that produces facts, not compliments.',
+      topics: [
+        ['pm-mom-test', 'The Mom Test: ask about their life, not your idea'],
+        ['pm-interviews', 'Continuous customer interviews and synthesis'],
+        ['pm-ost', 'Opportunity solution trees'],
+        ['pm-assumptions', 'Identifying and testing the riskiest assumption'],
+        ['pm-prototype', 'Prototypes, fake doors and concierge tests'],
+      ],
+      practice: 'Interview 3 people about how they prepare for interviews. Write down 3 facts and 1 assumption you were wrong about.',
+      links: [['The Mom Test (Rob Fitzpatrick)', 'https://www.momtestbook.com/'], ['Continuous Discovery Habits (Teresa Torres)', 'https://www.producttalk.org/continuous-discovery-habits/']],
+    },
+    {
+      id: 'product-3', title: 'Metrics that matter', hours: 4,
+      outcome: 'Define a north star metric, its input metrics and guardrails for any product.',
+      topics: [
+        ['pm-north-star', 'North star metric and input metrics'],
+        ['pm-funnels', 'Funnels, activation and conversion'],
+        ['pm-retention', 'Retention curves and cohorts'],
+        ['pm-guardrails', 'Guardrail metrics and vanity metrics'],
+        ['pm-instrument', 'Instrumenting events: what engineers should log'],
+      ],
+      practice: 'For a product you use daily (Spotify, Uber…), define the north star, 3 input metrics and 2 guardrails.',
+      links: [['North Star Playbook (Amplitude)', 'https://amplitude.com/books/north-star'], ['Lean Analytics (Croll & Yoskovitz)', 'https://leananalyticsbook.com/']],
+    },
+    {
+      id: 'product-4', title: 'Experiments & data-informed decisions', hours: 4,
+      outcome: 'Design an A/B test and say when not to run one.',
+      topics: [
+        ['pm-ab', 'A/B testing: hypothesis, control, variant, success metric'],
+        ['pm-stats', 'Sample size, significance and peeking'],
+        ['pm-pitfalls', 'Novelty effects, network effects, Simpson’s paradox'],
+        ['pm-flags', 'Feature flags and gradual rollouts as experiments'],
+        ['pm-qual', 'When qualitative evidence beats an experiment'],
+      ],
+      practice: 'Write an experiment plan for one feature of your RAG project or this tracker: hypothesis, metric, sample size, decision rule.',
+      links: [['Trustworthy Online Controlled Experiments (Kohavi et al.)', 'https://experimentguide.com/'], ['Evan Miller: sample size calculator', 'https://www.evanmiller.org/ab-testing/sample-size.html']],
+    },
+    {
+      id: 'product-5', title: 'Prioritization, scoping & trade-offs', hours: 4,
+      outcome: 'Cut scope to ship the smallest valuable thing, and defend the trade-off.',
+      topics: [
+        ['pm-rice', 'RICE and impact vs effort'],
+        ['pm-mvp', 'MVPs, appetite and fixed time / variable scope'],
+        ['pm-build-trap', 'Outcomes over output: escaping the build trap'],
+        ['pm-tech-debt', 'Technical debt as a product decision'],
+        ['pm-say-no', 'Saying no and negotiating scope with stakeholders'],
+      ],
+      practice: 'Write a one-page “shaped” pitch for a feature: problem, appetite, solution sketch, rabbit holes, no-gos.',
+      links: [['Shape Up (Basecamp, free)', 'https://basecamp.com/shapeup'], ['Escaping the Build Trap (Melissa Perri)', 'https://melissaperri.com/book']],
+    },
+    {
+      id: 'product-6', title: 'Product sense in interviews & docs', hours: 5,
+      outcome: 'Open every design round with users and goals, and tell stories in business impact.',
+      topics: [
+        ['pm-sd', 'Start system design with users, use cases and success metrics'],
+        ['pm-sense', 'Product sense questions: “how would you improve X?”'],
+        ['pm-docs', 'Writing PRDs, RFCs and design docs'],
+        ['pm-impact', 'Describing results in business terms (revenue, retention, cost, time)'],
+        ['pm-collab', 'Working with PMs and designers: when to push back'],
+      ],
+      practice: 'Rewrite the Result of 3 STAR stories in business terms, and answer “how would you improve Google Maps?” out loud in 10 minutes.',
+      links: [['Design docs at Google', 'https://www.industrialempathy.com/posts/design-docs-at-google/'], ['Cracking the PM Interview', 'https://www.crackingthepminterview.com/']],
+    },
+  ],
+
   // ------------------------------------------------------------------ Fundamentals
   fund: [
     {
@@ -456,9 +539,9 @@ export const CURRICULUM = {
     },
     {
       id: 'fund-8', title: 'Behavioral stories, part 2 & mocks', hours: 5,
-      outcome: 'Eight stories ready and two mock interviews done.',
+      outcome: 'All STAR stories ready and two mock interviews done.',
       topics: ['Deadline, ownership, ambiguity, mentoring stories', 'Questions to ask the interviewer', 'Mock interview feedback loop'],
-      practice: 'Write STAR stories 5–8 and do two mock interviews (peer or interviewing.io).',
+      practice: 'Write the remaining STAR stories, including the product decision one, and do two mock interviews (peer or interviewing.io).',
       links: [['interviewing.io', 'https://interviewing.io/'], ['Exponent peer mocks', 'https://www.tryexponent.com/practice']],
     },
   ],
@@ -470,6 +553,7 @@ const REVIEW = {
   sd: { title: 'Final review: mock designs', outcome: 'Two designs you can deliver in your sleep.', topics: ['Skim your one-page summaries', 'Redo your two weakest designs', 'One mock design interview'], practice: 'One mock design round, then rest.', links: [] },
   ai: { title: 'Final review: project & concepts', outcome: 'Project story and core concepts sharp.', topics: ['Re-read project notes and numbers', 'Rehearse the 2- and 10-minute pitch', 'Skim transformer and RAG notes'], practice: 'Pitch the project to a friend.', links: [] },
   ops: { title: 'Final review: pipeline walkthrough', outcome: 'Walk an interviewer through your delivery pipeline.', topics: ['Draw your pipeline from commit to production', 'Explain one migration you shipped with zero downtime', 'Explain your rollback plan'], practice: 'Whiteboard the pipeline in 5 minutes.', links: [] },
+  product: { title: 'Final review: product stories', outcome: 'Every answer anchored in users and impact.', topics: ['Re-read your metric and experiment notes', 'Practise one product sense question', 'Check every STAR result has a number'], practice: 'One product sense answer out loud, 10 minutes.', links: [] },
   fund: { title: 'Final review: rest & confidence', outcome: 'Rested and confident.', topics: ['Skim fundamentals notes', 'Read your STAR stories once', 'Sleep'], practice: 'You did the work.', links: [] },
 }
 

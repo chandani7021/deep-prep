@@ -1,6 +1,6 @@
 # Deep Prep 🌊
 
-An interview prep tracker for DSA, system design, AI/ML, DevOps and CS fundamentals. You choose the plan length (14–365 days) and the areas.
+An interview prep tracker for DSA, system design, AI/ML, DevOps, product thinking and CS fundamentals. You choose the plan length (14–365 days) and the areas.
 Every bit of work takes you deeper: XP is measured in metres, levels go from the Shoreline to Challenger Deep.
 
 ## What's inside
@@ -11,10 +11,11 @@ Every bit of work takes you deeper: XP is measured in metres, levels go from the
 - **DSA**: 19 patterns, ~150 LeetCode problems (NeetCode 150 ones tagged `NC`), spaced repetition (3 → 6 → 12 → 24 days → mastered), notes per problem, add your own problems.
 - **System design**: interview framework, 20 building blocks, 16 practice designs (including AI/ML systems) with session counts and confidence ratings.
 - **AI/ML**: classic ML → deep learning → LLM engineering → ML system design, plus RAG project milestones.
-- **Fundamentals**: networking, OS, databases, code design, and 8 STAR story templates.
-- **Library**: books, courses and videos (including trending tech: AI agents & MCP, Kubernetes, Terraform, Go, Rust, Kafka, OpenTelemetry) with progress counters and "where I left off" notes.
+- **Product thinking**: users and jobs to be done, discovery, metrics, experiments, prioritization and product sense, with habits to apply weekly.
+- **Fundamentals**: networking, OS, databases, code design, STAR story templates, and the developer-craft books that make fundamentals strong.
+- **Library**: books, courses and videos, including developer craft books (Pragmatic Programmer, Refactoring, CS:APP…), a weekly “stay current” list (Tech Radar, newsletters), product books, and trending tech: AI agents & MCP, Kubernetes, Terraform, Go, Rust, Kafka, OpenTelemetry) with progress counters and "where I left off" notes.
 - **Mock interviews**: log sessions with ratings and takeaways.
-- **Achievements**: 28 badges, depth levels, streak freezes, focus timer rewards.
+- **Achievements**: 30 badges, depth levels, streak freezes, focus timer rewards.
 
 Progress is cached in your browser (localStorage) and can be backed up online to a **private GitHub Gist** in your own account:
 Settings → Online backup → paste a GitHub token with only the `gist` scope. Paste the same token on other devices and
