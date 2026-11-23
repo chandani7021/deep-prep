@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ExternalLink, Play, Plus, Trash2 } from 'lucide-react'
+import { ChevronDown, ExternalLink, ListChecks, Play, Plus, Trash2 } from 'lucide-react'
 import { QUOTES, RESOURCES, SD_PROBLEMS, AI_SECTIONS, TRACKS, tasksForDay } from '../data/content.js'
 import { CURRICULUM, planLoad } from '../data/curriculum.js'
 import { PATTERNS, lcUrl } from '../data/problems.js'
@@ -7,6 +7,7 @@ import { addDays, celebrate, dayKey, dueReviews, planPosition, problemActions, s
 import { Check, DiffChip, DiveLog } from '../components/ui.jsx'
 import { linkFor } from '../components/EditableLink.jsx'
 import { useFocus } from '../components/Focus.jsx'
+import TaskDetail, { todaysProblems } from '../components/TaskDetail.jsx'
 
 export default function Today({ go }) {
   const { state, act } = useStore()
@@ -21,6 +22,12 @@ export default function Today({ go }) {
   const streak = streakInfo(state)
   const quote = QUOTES[(pos.day - 1) % QUOTES.length]
   const [newTask, setNewTask] = useState('')
+  // Open the first unfinished task by default so today's "what to do" is visible straight away.
+  const [openIds, setOpenIds] = useState(() => new Set([tasks.find((t) => !day.tasks[t.id])?.id].filter(Boolean)))
+  const toggleOpen = (id) => setOpenIds((o) => { const n = new Set(o); n.has(id) ? n.delete(id) : n.add(id); return n })
+  const totalMins = tasks.reduce((a, t) => a + t.mins, 0)
+  const fmt = (m) => (m >= 60 ? `${Math.floor(m / 60)} h${m % 60 ? ` ${m % 60} min` : ''}` : `${m} min`)
+  const jumpToTasks = () => document.getElementById('todays-dive')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 
   const toggleTask = (t) => {
     const was = !!day.tasks[t.id]
@@ -68,6 +75,9 @@ export default function Today({ go }) {
             {state.profile.name ? ` Keep going, ${state.profile.name}.` : ''}
           </p>
           <p className="hero-quote">{quote}</p>
+          <button className="btn primary today-jump" onClick={jumpToTasks}>
+            <ListChecks size={16} /> Today: {tasks.length} tasks · about {fmt(totalMins)} · {doneCount} done
+          </button>
         </div>
         <div className="hero-streak">
           <div className="big">{streak.current}<span aria-hidden="true">{streak.doneToday ? ' 🔥' : ''}</span></div>
@@ -101,7 +111,7 @@ export default function Today({ go }) {
 
       <div className="grid-2">
         <div className="stack">
-          <section className="panel">
+          <section className="panel" id="todays-dive">
             <div className="panel-head">
               <div>
                 <h2>Today’s dive</h2>
@@ -111,32 +121,50 @@ export default function Today({ go }) {
             </div>
             <div className="day-bar" aria-hidden="true"><span style={{ width: `${(doneCount / tasks.length) * 100}%` }} /></div>
 
-            {tasks.map((t) => (
-              <div key={t.id} className={`task ${day.tasks[t.id] ? 'done' : ''}`} onClick={() => toggleTask(t)}
-                role="checkbox" aria-checked={!!day.tasks[t.id]} tabIndex={0}
-                onKeyDown={(e) => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); toggleTask(t) } }}>
-                <Check on={day.tasks[t.id]} />
-                <div className="task-body">
-                  <div className="task-label">{t.id === 'dsa' ? `Solve ${state.profile.dailyProblems} DSA problems` : t.label}</div>
-                  <div className="muted small">{t.detail}</div>
-                  <div className="task-meta">
-                    <span className="chip xp">+{t.xp} m</span>
-                    <span className="chip track" style={{ color: TRACKS[t.track].color }}>{TRACKS[t.track].name}</span>
-                    <span className="chip">{t.mins} min</span>
-                    {!day.tasks[t.id] && t.mins >= 25 && (
-                      <button className="btn sm ghost" onClick={(e) => { e.stopPropagation(); focus.start(Math.min(t.mins, 60), t.label) }}>
-                        <Play size={13} /> Focus {Math.min(t.mins, 60)} min
-                      </button>
+            <p className="small muted" style={{ marginBottom: 10 }}>Tap a task to see exactly what to do. Tick the circle when it’s done.</p>
+            {tasks.map((t) => {
+              const done = !!day.tasks[t.id]
+              const isOpen = openIds.has(t.id)
+              return (
+                <div key={t.id} className={`task ${done ? 'done' : ''} ${isOpen ? 'open' : ''}`}>
+                  <button type="button" className="task-check" onClick={() => toggleTask(t)} aria-pressed={done}
+                    aria-label={`${done ? 'Mark not done' : 'Mark done'}: ${t.label}`}>
+                    <Check on={done} />
+                  </button>
+                  <div className="task-body">
+                    <button type="button" className="task-summary" onClick={() => toggleOpen(t.id)} aria-expanded={isOpen} aria-controls={`task-${t.id}`}>
+                      <span className="task-label">{t.id === 'dsa' ? `Solve ${state.profile.dailyProblems} DSA problems` : t.label}</span>
+                      <ChevronDown size={18} className="task-chevron" aria-hidden="true" />
+                    </button>
+                    <div className="muted small">{t.detail}</div>
+                    <div className="task-meta">
+                      <span className="chip xp">+{t.xp} m</span>
+                      <span className="chip track" style={{ color: TRACKS[t.track].color }}>{TRACKS[t.track].name}</span>
+                      <span className="chip">{t.mins} min</span>
+                      {!done && t.mins >= 25 && (
+                        <button className="btn sm ghost" onClick={() => focus.start(Math.min(t.mins, 60), t.label)}>
+                          <Play size={13} /> Focus {Math.min(t.mins, 60)} min
+                        </button>
+                      )}
+                    </div>
+                    {isOpen && (
+                      <div className="task-detail" id={`task-${t.id}`}>
+                        <TaskDetail task={t} pos={pos} go={go} />
+                        <div className="row" style={{ marginTop: 4 }}>
+                          <button className={`btn sm ${done ? '' : 'primary'}`} onClick={() => toggleTask(t)}>{done ? 'Mark not done' : 'Mark task done'}</button>
+                        </div>
+                      </div>
                     )}
                   </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
 
             {day.custom.map((c) => (
-              <div key={c.id} className={`task ${c.done ? 'done' : ''}`} onClick={() => toggleCustom(c)} role="checkbox" aria-checked={c.done} tabIndex={0}
-                onKeyDown={(e) => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); toggleCustom(c) } }}>
-                <Check on={c.done} />
+              <div key={c.id} className={`task ${c.done ? 'done' : ''}`}>
+                <button type="button" className="task-check" onClick={() => toggleCustom(c)} aria-pressed={c.done} aria-label={`${c.done ? 'Mark not done' : 'Mark done'}: ${c.text}`}>
+                  <Check on={c.done} />
+                </button>
                 <div className="task-body"><div className="task-label">{c.text}</div><div className="task-meta"><span className="chip xp">+10 m</span></div></div>
                 <button className="btn icon ghost" aria-label="Delete task" onClick={(e) => {
                   e.stopPropagation()
@@ -196,19 +224,7 @@ function NextUp({ pos, go }) {
 
   const wk = (id) => plan.firstWeek[id] || 999
   const has = (t) => plan.tracks.includes(t)
-  // DSA: this week's patterns first, then any earlier unfinished pattern, then anything left
-  const ordered = [
-    ...PATTERNS.filter((p) => wk(p.id) === week),
-    ...PATTERNS.filter((p) => wk(p.id) < week),
-    ...PATTERNS.filter((p) => wk(p.id) > week),
-  ]
-  const next = []
-  for (const p of ordered) {
-    for (const [slug, title, diff] of p.problems) {
-      if (!isDone(slug) && next.length < state.profile.dailyProblems) next.push({ slug, title, diff, pattern: p.name, url: lcUrl(slug) })
-    }
-    if (next.length >= state.profile.dailyProblems) break
-  }
+  const next = todaysProblems(state, plan, week).filter((p) => !p.done).map((p) => ({ ...p, pattern: p.pattern.name }))
 
   const sd = has('sd') && (SD_PROBLEMS.find((p) => wk(p.id) <= week && !(state.sdProblems[p.id]?.count > 0)) || SD_PROBLEMS.find((p) => !(state.sdProblems[p.id]?.count > 0)))
   const aiTopic = has('ai') && AI_SECTIONS.flatMap((s) => s.topics.map(([id, name]) => ({ id, name, section: s.name }))).find((t) => !state.aiTopics[t.id])

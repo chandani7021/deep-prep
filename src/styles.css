@@ -451,3 +451,23 @@ details.notes summary { cursor: pointer; color: var(--muted); font-size: 13px; }
 .load-areas { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 4px 12px; }
 .bench { display: flex; gap: 16px; flex-wrap: wrap; padding: 16px 18px; border-top: 1px solid var(--line); }
 .bench:first-child { border-top: 0; }
+
+/* ---------------------------------------------------------------- today's tasks */
+.task-check { border: 0; background: transparent; padding: 0; margin-top: 1px; cursor: pointer; border-radius: 999px; flex: none; }
+.task-check:focus-visible { outline: 2px solid var(--glow); outline-offset: 3px; }
+.task { cursor: default; }
+.task-summary { display: flex; align-items: flex-start; gap: 8px; width: 100%; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.task-summary .task-label { flex: 1; }
+.task-summary:hover .task-label { color: var(--foam); }
+.task-chevron { color: var(--dim); transition: transform 0.15s; flex: none; margin-top: 2px; }
+.task.open .task-chevron { transform: rotate(180deg); color: var(--text); }
+.task.open { border-color: var(--line-strong); }
+.task-detail { display: grid; gap: 10px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+.task-detail p { margin: 0; }
+.steps { margin: 0; padding-left: 20px; display: grid; gap: 4px; font-size: 14px; color: var(--muted); }
+.detail-list { display: grid; }
+.detail-row { padding: 8px 0; border-top: 1px solid var(--line); gap: 8px; }
+.detail-row:first-child { border-top: 0; }
+.detail-module { display: grid; gap: 6px; }
+.detail-module details summary { cursor: pointer; color: var(--muted); }
+.today-jump { margin-top: 14px; }
