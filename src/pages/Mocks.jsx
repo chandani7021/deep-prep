@@ -23,7 +23,7 @@ export default function Mocks() {
       <div>
         <h1>Mock interviews</h1>
         <p className="muted" style={{ maxWidth: '70ch' }}>
-          Start by week 6. One a week in month 2, two a week in month 3. Try <a href="https://interviewing.io/" target="_blank" rel="noreferrer">interviewing.io</a>,{' '}
+          Start around a third of the way into your plan: one a week at first, two a week near the end. Try <a href="https://interviewing.io/" target="_blank" rel="noreferrer">interviewing.io</a>,{' '}
           <a href="https://www.tryexponent.com/practice" target="_blank" rel="noreferrer">Exponent peer mocks</a>, or trade sessions with a friend.
         </p>
       </div>

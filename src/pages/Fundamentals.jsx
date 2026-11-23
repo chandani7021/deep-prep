@@ -2,6 +2,7 @@ import { FUND_SECTIONS, STORY_PROMPTS } from '../data/content.js'
 import { useStore } from '../store.jsx'
 import { Ring } from '../components/ui.jsx'
 import TopicGrid from '../components/TopicGrid.jsx'
+import ModuleList from '../components/Modules.jsx'
 
 const FIELDS = [['s', 'Situation'], ['t', 'Task'], ['a', 'Action (what you did, specifically)'], ['r', 'Result (numbers if you have them)']]
 
@@ -27,6 +28,8 @@ export default function Fundamentals() {
         </div>
         <Ring value={done / all.length} size={64} label={`${done}`} color="var(--c-fund)" />
       </div>
+
+      <ModuleList track="fund" />
 
       {FUND_SECTIONS.map((s) => (
         <section key={s.id} className="panel">

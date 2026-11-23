@@ -1,79 +1,40 @@
 // ---------------------------------------------------------------------------
-// 90-day plan
-// ---------------------------------------------------------------------------
-export const MONTHS = [
-  {
-    n: 1, name: 'Foundations', days: '1–30',
-    goals: [
-      'Solve ~60 problems across the first 7 patterns',
-      'Explain every system design building block without notes',
-      'Finish Andrew Ng ML Specialization Course 1 and most of Course 2',
-      'Answer “what happens when you type a URL” end to end',
-    ],
-  },
-  {
-    n: 2, name: 'Depth', days: '31–60',
-    goals: [
-      'Reach ~120 problems total, including trees, graphs, heaps and backtracking',
-      'Design 6 classic systems out loud, start to finish',
-      'Understand attention and transformers well enough to teach them',
-      'Start the RAG project and do your first 4 mock interviews',
-    ],
-  },
-  {
-    n: 3, name: 'Interview mode', days: '61–90',
-    goals: [
-      'Reach 170+ problems with DP, greedy and intervals done',
-      'Design 10+ systems, including 2 AI/ML systems',
-      'Ship the RAG project with an evaluation write-up',
-      'Write 8 STAR stories and do 6+ mock interviews',
-    ],
-  },
-]
-
-export const WEEKS = [
-  { n: 1, dsa: 'Arrays & Hashing, Two Pointers', sd: 'Scaling basics: vertical vs horizontal, load balancers, stateless services', ai: 'ML Specialization C1: linear regression, cost function, gradient descent', fund: 'HTTP, DNS, what happens when you type a URL' },
-  { n: 2, dsa: 'Sliding Window, Stack', sd: 'Caching: CDN, cache-aside vs write-through, eviction, invalidation', ai: 'Logistic regression, overfitting, regularization', fund: 'TCP vs UDP, TLS handshake, HTTP/2 and HTTP/3' },
-  { n: 3, dsa: 'Binary Search, Linked List', sd: 'Databases: SQL vs NoSQL, indexing, replication', ai: 'ML Specialization C2: neural network basics, evaluation metrics', fund: 'Transactions, ACID, isolation levels' },
-  { n: 4, dsa: 'Prefix Sum + month 1 review, first timed sessions', sd: 'Sharding, CAP & PACELC, consistency models, message queues', ai: 'Decision trees, ensembles, bias-variance. Month 1 recap', fund: 'Index internals: B-trees vs LSM trees' },
-  { n: 5, dsa: 'Trees part 1 (traversals, depth, BST basics)', sd: 'Design: URL shortener, rate limiter', ai: 'Karpathy: building micrograd (backprop from scratch)', fund: 'Processes vs threads, context switching' },
-  { n: 6, dsa: 'Trees part 2, Tries', sd: 'Design: notification system, key-value store', ai: 'Karpathy: makemore 1–2, embeddings', fund: 'Concurrency: locks, mutexes, semaphores. First mock interview' },
-  { n: 7, dsa: 'Heap / Top-K, Backtracking', sd: 'Design: news feed, chat system', ai: 'Illustrated Transformer, attention mechanism', fund: 'Deadlocks, virtual memory, paging' },
-  { n: 8, dsa: 'Graphs, Union-Find, Topological sort', sd: 'Design: file storage (Dropbox), search autocomplete', ai: 'Karpathy: Let’s build GPT. Start the RAG project', fund: 'CPU scheduling, memory hierarchy and caching' },
-  { n: 9, dsa: '1-D Dynamic Programming', sd: 'Design: video streaming, unique ID generator, web crawler', ai: 'AI Engineering: prompting, RAG. Project: ingestion + retrieval', fund: 'Behavioral: write STAR stories 1–4' },
-  { n: 10, dsa: '2-D Dynamic Programming, Greedy', sd: 'AI system design: RAG-based search / support bot', ai: 'Evaluation, fine-tuning vs RAG, agents. Project: eval harness', fund: 'Behavioral: write STAR stories 5–8' },
-  { n: 11, dsa: 'Intervals, Math & Bits, Weighted graphs', sd: 'ML system design: recommendation system', ai: 'Designing ML Systems key chapters. Project: polish and deploy', fund: 'Two mock interviews this week' },
-  { n: 12, dsa: 'Mixed timed practice, clear the review queue', sd: 'Mock system design interviews, revisit weak designs', ai: 'Project write-up, practice explaining it in 2 and 10 minutes', fund: 'Two mock interviews this week' },
-  { n: 13, dsa: 'Light review of mastered patterns only', sd: 'Skim your one-page summaries', ai: 'Re-read project notes', fund: 'Rest, sleep, confidence. You did the work.' },
-]
-
-// ---------------------------------------------------------------------------
 // Daily task templates (0 = Sunday ... 6 = Saturday)
 // ---------------------------------------------------------------------------
-export const WEEKDAY_TASKS = [
-  { id: 'dsa', label: 'Solve today’s DSA problems', detail: 'Pattern of the week. 25 min per problem, then study the solution and mark it for review.', xp: 40, track: 'dsa', mins: 60 },
-  { id: 'sd', label: 'System design: read + one-page summary', detail: 'Write it in your own words with a rough diagram.', xp: 30, track: 'sd', mins: 60 },
-  { id: 'ai', label: 'AI/ML: study or project work', detail: 'Course videos, reading, or building.', xp: 30, track: 'ai', mins: 60 },
-  { id: 'talk', label: 'Explain one solution out loud', detail: 'Two minutes, as if to an interviewer. Communication is a skill too.', xp: 10, track: 'dsa', mins: 5 },
-]
+const STUDY_BLOCKS = {
+  sd: { id: 'sd', label: 'System design: read + one-page summary', detail: 'This week’s module. Write it in your own words with a rough diagram.', xp: 30, track: 'sd', mins: 60 },
+  ai: { id: 'ai', label: 'AI/ML: study or project work', detail: 'This week’s module: course videos, reading, or building.', xp: 30, track: 'ai', mins: 60 },
+  ops: { id: 'ops', label: 'DevOps: study + hands-on lab', detail: 'This week’s module. Build something small: a workflow, a Dockerfile, a migration.', xp: 30, track: 'ops', mins: 60 },
+  fund: { id: 'fund', label: 'Fundamentals: one topic, deep', detail: 'This week’s module. Explain it out loud when you are done.', xp: 30, track: 'fund', mins: 45 },
+}
+const DSA_TASK = { id: 'dsa', label: 'Solve today’s DSA problems', detail: 'Pattern of the week. 25 min per problem, then study the solution and mark it for review.', xp: 40, track: 'dsa', mins: 60 }
+const TALK_TASK = { id: 'talk', label: 'Explain one solution out loud', detail: 'Two minutes, as if to an interviewer. Communication is a skill too.', xp: 10, track: 'dsa', mins: 5 }
 
-export const SATURDAY_TASKS = [
-  { id: 'timed', label: 'Timed DSA: 3 problems in 90 minutes', detail: 'A LeetCode contest counts too.', xp: 60, track: 'dsa', mins: 90 },
-  { id: 'design', label: 'Design one full system out loud', detail: 'Requirements → estimates → API → data model → high level → deep dive.', xp: 60, track: 'sd', mins: 90 },
-  { id: 'deep', label: 'AI project or CS fundamentals (2 h)', detail: 'Pick whichever is behind.', xp: 50, track: 'ai', mins: 120 },
-]
-
-export const SUNDAY_TASKS = [
-  { id: 'resolve', label: 'Re-solve problems you got stuck on', detail: 'Clear your review queue first.', xp: 40, track: 'dsa', mins: 60 },
-  { id: 'review', label: 'Weekly review', detail: 'Write what went well and what is weak on the Roadmap page.', xp: 30, track: 'plan', mins: 60 },
-  { id: 'catchup', label: 'Catch-up or fundamentals (1 h)', detail: 'Then take the rest of the day off.', xp: 30, track: 'fund', mins: 60 },
-]
-
-export const tasksForDay = (date) => {
+/** Daily tasks for a date, built from the areas in your plan (0 = Sunday ... 6 = Saturday). */
+export const tasksForDay = (date, tracks = ['dsa', 'sd', 'ai', 'ops', 'fund']) => {
+  const has = (t) => tracks.includes(t)
+  const others = ['sd', 'ai', 'ops', 'fund'].filter(has)
   const d = date.getDay()
-  if (d === 6) return SATURDAY_TASKS
-  if (d === 0) return SUNDAY_TASKS
-  return WEEKDAY_TASKS
+  if (d === 6) {
+    const project = has('ai') && has('ops') ? 'AI project or DevOps lab (2 h)' : has('ai') ? 'AI project work (2 h)' : has('ops') ? 'DevOps hands-on lab (2 h)' : 'CS fundamentals deep dive (2 h)'
+    return [
+      has('dsa') && { id: 'timed', label: 'Timed DSA: 3 problems in 90 minutes', detail: 'A LeetCode contest counts too.', xp: 60, track: 'dsa', mins: 90 },
+      has('sd') && { id: 'design', label: 'Design one full system out loud', detail: 'Requirements → estimates → API → data model → high level → deep dive.', xp: 60, track: 'sd', mins: 90 },
+      { id: 'deep', label: project, detail: 'Pick whichever is behind.', xp: 50, track: has('ai') ? 'ai' : has('ops') ? 'ops' : 'fund', mins: 120 },
+    ].filter(Boolean)
+  }
+  if (d === 0) {
+    return [
+      has('dsa') && { id: 'resolve', label: 'Re-solve problems you got stuck on', detail: 'Clear your review queue first.', xp: 40, track: 'dsa', mins: 60 },
+      { id: 'review', label: 'Weekly review', detail: 'Write what went well and what is weak on the Roadmap page.', xp: 30, track: 'plan', mins: 60 },
+      { id: 'catchup', label: 'Catch-up (1 h)', detail: 'Whatever is behind. Then take the rest of the day off.', xp: 30, track: has('fund') ? 'fund' : 'plan', mins: 60 },
+    ].filter(Boolean)
+  }
+  // Weekdays: DSA every day, plus two study blocks that rotate through your other areas.
+  const per = has('dsa') ? 2 : 3
+  const blocks = []
+  for (let i = 0; i < Math.min(per, others.length); i++) blocks.push(STUDY_BLOCKS[others[((d - 1) * per + i) % others.length]])
+  return [...(has('dsa') ? [DSA_TASK] : []), ...blocks, ...(has('dsa') ? [TALK_TASK] : [])]
 }
 
 // ---------------------------------------------------------------------------
@@ -105,6 +66,28 @@ export const RESOURCES = [
   { id: 'fastai', title: 'Practical Deep Learning for Coders', author: 'fast.ai', type: 'Course', track: 'ai', must: false, url: 'https://course.fast.ai/', unit: 'lessons', total: 9, why: 'Top-down, code-first alternative if you learn by building.' },
   { id: 'hf-learn', title: 'Hugging Face Courses', author: 'Hugging Face', type: 'Course', track: 'ai', must: false, url: 'https://huggingface.co/learn', unit: 'percent', total: 100, why: 'Hands-on transformers, fine-tuning and tooling.' },
 
+  // DevOps & delivery
+  { id: 'gha-docs', title: 'GitHub Actions documentation', author: 'GitHub', type: 'Site', track: 'ops', must: true, url: 'https://docs.github.com/en/actions', unit: 'percent', total: 100, why: 'Workflows, caching, matrices, environments and OIDC: the CI/CD you will use first.' },
+  { id: 'docker-docs', title: 'Docker: Get started', author: 'Docker', type: 'Course', track: 'ops', must: true, url: 'https://docs.docker.com/get-started/', unit: 'percent', total: 100, why: 'Official hands-on intro: images, containers, Compose, multi-stage builds.' },
+  { id: 'cd-book', title: 'Continuous Delivery', author: 'Jez Humble & David Farley', type: 'Book', track: 'ops', must: false, url: 'https://continuousdelivery.com/', unit: 'chapters', total: 15, why: 'The classic on deployment pipelines, testing strategy and release safety.' },
+  { id: 'accelerate', title: 'Accelerate', author: 'Forsgren, Humble & Kim', type: 'Book', track: 'ops', must: false, url: 'https://itrevolution.com/product/accelerate/', unit: 'chapters', total: 16, why: 'The research behind DORA metrics. Great for “how do you measure delivery?” questions.' },
+  { id: 'sre-book', title: 'Site Reliability Engineering', author: 'Google', type: 'Book', track: 'ops', must: true, url: 'https://sre.google/sre-book/table-of-contents/', unit: 'chapters', total: 34, why: 'Free. Read SLOs, monitoring, on-call, postmortems and handling overload.' },
+  { id: 'dbre', title: 'Database Reliability Engineering', author: 'Laine Campbell & Charity Majors', type: 'Book', track: 'ops', must: true, url: 'https://www.oreilly.com/library/view/database-reliability-engineering/9781491925935/', unit: 'chapters', total: 13, why: 'The database DevOps book: migrations, backups, recovery, operational visibility.' },
+  { id: 'evodb', title: 'Evolutionary Database Design', author: 'Martin Fowler & Pramod Sadalage', type: 'Article', track: 'ops', must: true, url: 'https://martinfowler.com/articles/evodb.html', unit: 'percent', total: 100, why: 'Free. How to version and migrate schemas safely alongside code.' },
+  { id: 'devops-roadmap', title: 'DevOps roadmap', author: 'roadmap.sh', type: 'Site', track: 'ops', must: false, url: 'https://roadmap.sh/devops', unit: 'percent', total: 100, why: 'A map of the whole field with free links per topic. Use it to spot gaps.' },
+
+  // Trending technologies
+  { id: 'mcp-docs', title: 'Model Context Protocol', tech: 'AI agents & MCP', author: 'modelcontextprotocol.io', type: 'Site', track: 'trend', must: false, url: 'https://modelcontextprotocol.io/', unit: 'percent', total: 100, why: 'The open standard for connecting LLM apps to tools and data. Build one small MCP server.' },
+  { id: 'effective-agents', title: 'Building effective agents', tech: 'AI agents & MCP', author: 'Anthropic', type: 'Article', track: 'trend', must: false, url: 'https://www.anthropic.com/engineering/building-effective-agents', unit: 'percent', total: 100, why: 'The clearest guide to agent patterns: workflows vs agents, routing, orchestrator-workers.' },
+  { id: 'hf-agents', title: 'Hugging Face Agents Course', tech: 'AI agents & MCP', author: 'Hugging Face', type: 'Course', track: 'trend', must: false, url: 'https://huggingface.co/learn/agents-course', unit: 'percent', total: 100, why: 'Free, hands-on course building agents with popular frameworks.' },
+  { id: 'k8s-hard-way', title: 'Kubernetes the Hard Way', tech: 'Kubernetes', author: 'Kelsey Hightower', type: 'Course', track: 'trend', must: false, url: 'https://github.com/kelseyhightower/kubernetes-the-hard-way', unit: 'percent', total: 100, why: 'Bootstrap a cluster by hand to really understand what managed Kubernetes hides.' },
+  { id: 'k8s-up', title: 'Kubernetes: Up and Running (3rd ed.)', tech: 'Kubernetes', author: 'Burns, Beda, Hightower & Evenson', type: 'Book', track: 'trend', must: false, url: 'https://www.oreilly.com/library/view/kubernetes-up-and/9781098110192/', unit: 'chapters', total: 22, why: 'The standard practical book, from the people who created Kubernetes.' },
+  { id: 'tf-up', title: 'Terraform: Up & Running (3rd ed.)', tech: 'Terraform / IaC', author: 'Yevgeniy Brikman', type: 'Book', track: 'trend', must: false, url: 'https://www.terraformupandrunning.com/', unit: 'chapters', total: 10, why: 'The best introduction to infrastructure as code with real-world patterns.' },
+  { id: 'go-tests', title: 'Learn Go with Tests', tech: 'Go', author: 'Chris James', type: 'Site', track: 'trend', must: false, url: 'https://quii.gitbook.io/learn-go-with-tests', unit: 'percent', total: 100, why: 'Free. Learn Go (the language of cloud tooling) by writing tests first. Start with the Tour of Go.' },
+  { id: 'rust-book', title: 'The Rust Programming Language', tech: 'Rust', author: 'Klabnik & Nichols', type: 'Book', track: 'trend', must: false, url: 'https://doc.rust-lang.org/book/', unit: 'chapters', total: 21, why: 'Free official book. Pair it with Rustlings exercises.' },
+  { id: 'confluent', title: 'Confluent Developer courses', tech: 'Kafka & event streaming', author: 'Confluent', type: 'Course', track: 'trend', must: false, url: 'https://developer.confluent.io/courses/', unit: 'percent', total: 100, why: 'Free Kafka courses: fundamentals, Kafka Streams, event sourcing and data mesh.' },
+  { id: 'obs-eng', title: 'Observability Engineering', tech: 'OpenTelemetry & observability', author: 'Majors, Fong-Jones & Miranda', type: 'Book', track: 'trend', must: false, url: 'https://www.oreilly.com/library/view/observability-engineering/9781492076438/', unit: 'chapters', total: 21, why: 'Modern observability with high-cardinality events and OpenTelemetry.' },
+
   // Fundamentals
   { id: 'ostep', title: 'Operating Systems: Three Easy Pieces', author: 'Remzi & Andrea Arpaci-Dusseau', type: 'Book', track: 'fund', must: true, url: 'https://pages.cs.wisc.edu/~remzi/OSTEP/', unit: 'chapters', total: 50, why: 'Free. Read virtualization and concurrency sections for interviews.' },
   { id: 'hpbn', title: 'High Performance Browser Networking', author: 'Ilya Grigorik', type: 'Book', track: 'fund', must: false, url: 'https://hpbn.co/', unit: 'chapters', total: 18, why: 'Free. TCP, TLS, HTTP/2 explained for engineers.' },
@@ -122,6 +105,8 @@ export const TRACKS = {
   sd: { name: 'System design', color: 'var(--c-sd)' },
   ai: { name: 'AI/ML', color: 'var(--c-ai)' },
   fund: { name: 'Fundamentals', color: 'var(--c-fund)' },
+  ops: { name: 'DevOps', color: 'var(--c-ops)' },
+  trend: { name: 'Trending tech', color: 'var(--c-trend)' },
   plan: { name: 'Planning', color: 'var(--muted)' },
 }
 
@@ -152,22 +137,22 @@ export const SD_TOPICS = [
 ]
 
 export const SD_PROBLEMS = [
-  { id: 'url-shortener', name: 'URL shortener', level: 'Starter', week: 5 },
-  { id: 'rate-limiter', name: 'Rate limiter', level: 'Starter', week: 5 },
-  { id: 'notification', name: 'Notification system', level: 'Core', week: 6 },
-  { id: 'kv-store', name: 'Distributed key-value store', level: 'Core', week: 6 },
-  { id: 'news-feed', name: 'News feed', level: 'Core', week: 7 },
-  { id: 'chat', name: 'Chat system (WhatsApp)', level: 'Core', week: 7 },
-  { id: 'dropbox', name: 'File storage (Dropbox / Google Drive)', level: 'Core', week: 8 },
-  { id: 'autocomplete', name: 'Search autocomplete', level: 'Core', week: 8 },
-  { id: 'youtube', name: 'Video streaming (YouTube)', level: 'Advanced', week: 9 },
-  { id: 'unique-id', name: 'Distributed unique ID generator', level: 'Core', week: 9 },
-  { id: 'crawler', name: 'Web crawler', level: 'Advanced', week: 9 },
-  { id: 'ticketmaster', name: 'Ticket booking (Ticketmaster)', level: 'Advanced', week: 10 },
-  { id: 'rag-search', name: 'RAG-based document search / support bot', level: 'AI', week: 10 },
-  { id: 'recsys', name: 'Recommendation system', level: 'AI', week: 11 },
-  { id: 'llm-gateway', name: 'LLM gateway (routing, caching, rate limits, cost)', level: 'AI', week: 11 },
-  { id: 'payments', name: 'Payment system', level: 'Advanced', week: 12 },
+  { id: 'url-shortener', name: 'URL shortener', level: 'Starter' },
+  { id: 'rate-limiter', name: 'Rate limiter', level: 'Starter' },
+  { id: 'notification', name: 'Notification system', level: 'Core' },
+  { id: 'kv-store', name: 'Distributed key-value store', level: 'Core' },
+  { id: 'news-feed', name: 'News feed', level: 'Core' },
+  { id: 'chat', name: 'Chat system (WhatsApp)', level: 'Core' },
+  { id: 'dropbox', name: 'File storage (Dropbox / Google Drive)', level: 'Core' },
+  { id: 'autocomplete', name: 'Search autocomplete', level: 'Core' },
+  { id: 'youtube', name: 'Video streaming (YouTube)', level: 'Advanced' },
+  { id: 'unique-id', name: 'Distributed unique ID generator', level: 'Core' },
+  { id: 'crawler', name: 'Web crawler', level: 'Advanced' },
+  { id: 'ticketmaster', name: 'Ticket booking (Ticketmaster)', level: 'Advanced' },
+  { id: 'rag-search', name: 'RAG-based document search / support bot', level: 'AI' },
+  { id: 'recsys', name: 'Recommendation system', level: 'AI' },
+  { id: 'llm-gateway', name: 'LLM gateway (routing, caching, rate limits, cost)', level: 'AI' },
+  { id: 'payments', name: 'Payment system', level: 'Advanced' },
 ]
 
 // ---------------------------------------------------------------------------
@@ -175,7 +160,7 @@ export const SD_PROBLEMS = [
 // ---------------------------------------------------------------------------
 export const AI_SECTIONS = [
   {
-    id: 'ml', name: 'Classic ML', month: 1,
+    id: 'ml', name: 'Classic ML',
     topics: [
       ['supervised', 'Supervised vs unsupervised learning'],
       ['linreg', 'Linear regression & gradient descent'],
@@ -188,7 +173,7 @@ export const AI_SECTIONS = [
     ],
   },
   {
-    id: 'dl', name: 'Deep learning', month: 2,
+    id: 'dl', name: 'Deep learning',
     topics: [
       ['nn', 'Neural networks & activation functions'],
       ['backprop', 'Backpropagation (build it once by hand)'],
@@ -200,7 +185,7 @@ export const AI_SECTIONS = [
     ],
   },
   {
-    id: 'llm', name: 'LLM engineering', month: 3,
+    id: 'llm', name: 'LLM engineering',
     topics: [
       ['prompting', 'Prompt engineering & structured outputs'],
       ['rag', 'RAG: chunking, embeddings, retrieval, reranking'],
@@ -212,7 +197,7 @@ export const AI_SECTIONS = [
     ],
   },
   {
-    id: 'mlsys', name: 'ML system design', month: 3,
+    id: 'mlsys', name: 'ML system design',
     topics: [
       ['pipeline', 'Data pipelines & feature stores'],
       ['train-serve', 'Training vs serving, online vs batch inference'],
@@ -223,17 +208,31 @@ export const AI_SECTIONS = [
 ]
 
 export const PROJECT_MILESTONES = [
-  { id: 'pick', label: 'Pick a dataset you care about (docs, papers, a public knowledge base)', week: 8 },
-  { id: 'baseline', label: 'Baseline: answer questions with plain prompting, no retrieval', week: 8 },
-  { id: 'ingest', label: 'Ingestion: load, clean and chunk documents', week: 9 },
-  { id: 'embed', label: 'Embed chunks and store them in a vector index', week: 9 },
-  { id: 'retrieve', label: 'Retrieval + generation with citations', week: 9 },
-  { id: 'evalset', label: 'Build a golden set of 30–50 questions with expected answers', week: 10 },
-  { id: 'evals', label: 'Measure retrieval quality and answer accuracy', week: 10 },
-  { id: 'improve', label: 'Try one improvement (chunk size, hybrid search, reranker) and measure it', week: 10 },
-  { id: 'ui', label: 'Simple UI and deploy it', week: 11 },
-  { id: 'writeup', label: 'Write-up: architecture, trade-offs, numbers, what you would do next', week: 11 },
-  { id: 'pitch', label: 'Practise explaining it in 2 minutes and in 10 minutes', week: 12 },
+  { id: 'pick', label: 'Pick a dataset you care about (docs, papers, a public knowledge base)' },
+  { id: 'baseline', label: 'Baseline: answer questions with plain prompting, no retrieval' },
+  { id: 'ingest', label: 'Ingestion: load, clean and chunk documents' },
+  { id: 'embed', label: 'Embed chunks and store them in a vector index' },
+  { id: 'retrieve', label: 'Retrieval + generation with citations' },
+  { id: 'evalset', label: 'Build a golden set of 30–50 questions with expected answers' },
+  { id: 'evals', label: 'Measure retrieval quality and answer accuracy' },
+  { id: 'improve', label: 'Try one improvement (chunk size, hybrid search, reranker) and measure it' },
+  { id: 'ui', label: 'Simple UI and deploy it' },
+  { id: 'writeup', label: 'Write-up: architecture, trade-offs, numbers, what you would do next' },
+  { id: 'pitch', label: 'Practise explaining it in 2 minutes and in 10 minutes' },
+]
+
+// DevOps project: ship this tracker (or any app) the way a production team would.
+export const OPS_MILESTONES = [
+  { id: 'repo', label: 'Repo on GitHub with branch protection, PR template and code owners' },
+  { id: 'ci', label: 'CI: install, lint and build on every pull request, as a required check' },
+  { id: 'docker', label: 'Multi-stage Dockerfile, image pushed to a registry from CI' },
+  { id: 'deploy', label: 'Automatic deploy on merge to main, plus preview deploys for PRs' },
+  { id: 'k8s', label: 'Run the image on a local Kubernetes cluster (Deployment, Service, Ingress)' },
+  { id: 'iac', label: 'Infrastructure defined in Terraform, with plan running in CI' },
+  { id: 'migrations', label: 'Small API + Postgres with versioned migrations tested in CI; one expand/contract change' },
+  { id: 'backup', label: 'Backup and restore drill, with a written runbook and timing' },
+  { id: 'observe', label: 'Health checks, a metrics dashboard, one alert and a mock postmortem' },
+  { id: 'secure', label: 'Dependabot + code scanning on, least-privilege workflow permissions, no long-lived secrets' },
 ]
 
 // ---------------------------------------------------------------------------

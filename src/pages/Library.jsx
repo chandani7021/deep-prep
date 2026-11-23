@@ -4,7 +4,7 @@ import { RESOURCES, TRACKS } from '../data/content.js'
 import { celebrate, useStore } from '../store.jsx'
 import { Progress } from '../components/ui.jsx'
 
-const FILTERS = [['all', 'All'], ['dsa', 'DSA'], ['sd', 'System design'], ['ai', 'AI/ML'], ['fund', 'Fundamentals']]
+const FILTERS = [['all', 'All'], ['dsa', 'DSA'], ['sd', 'System design'], ['ai', 'AI/ML'], ['ops', 'DevOps'], ['fund', 'Fundamentals'], ['trend', 'Trending tech']]
 
 export default function Library() {
   const { state } = useStore()
@@ -22,7 +22,7 @@ export default function Library() {
       </div>
 
       <div className="row">
-        <div className="seg" role="group" aria-label="Track">
+        <div className="seg" role="group" aria-label="Track" style={{ flexWrap: 'wrap' }}>
           {FILTERS.map(([id, name]) => <button key={id} aria-pressed={track === id} onClick={() => setTrack(id)}>{name}</button>)}
         </div>
         <div className="seg" role="group" aria-label="Priority">
@@ -78,7 +78,7 @@ function Resource({ r }) {
           {r.must && <span className="chip must">Must</span>}
           {p.done && <span className="chip easy">Finished</span>}
         </div>
-        <div className="small muted">{r.author ? `${r.author} · ` : ''}{r.type} · <span style={{ color: TRACKS[r.track]?.color }}>{TRACKS[r.track]?.name}</span></div>
+        <div className="small muted">{r.author ? `${r.author} · ` : ''}{r.type} · <span style={{ color: TRACKS[r.track]?.color }}>{r.tech || TRACKS[r.track]?.name}</span></div>
         {r.why && <p className="small" style={{ marginTop: 6, maxWidth: '64ch' }}>{r.why}</p>}
         <input className="input" style={{ marginTop: 10 }} placeholder={r.unit === 'videos' ? 'Where I left off, e.g. video 3 at 1:12:40' : 'Where I left off, e.g. ch. 5, p. 142'}
           defaultValue={p.note || ''} onBlur={(e) => patch({ note: e.target.value })} aria-label={`Where you left off in ${r.title}`} />

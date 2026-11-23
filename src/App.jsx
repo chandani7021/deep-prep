@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Award, BookOpen, Brain, Code2, Cpu, Map, Mic, Network, Settings as Cog, Sun, Waves } from 'lucide-react'
+import { Award, BookOpen, Brain, Code2, Cpu, Map, Mic, Network, Rocket, Settings as Cog, Sun, Waves } from 'lucide-react'
 import { dueReviews, levelFor, streakInfo, useStore } from './store.jsx'
 import { DepthGauge, Toasts } from './components/ui.jsx'
 import { FocusProvider, FocusWidget } from './components/Focus.jsx'
@@ -9,6 +9,7 @@ import DSA from './pages/DSA.jsx'
 import SystemDesign from './pages/SystemDesign.jsx'
 import AIML from './pages/AIML.jsx'
 import Fundamentals from './pages/Fundamentals.jsx'
+import DevOps from './pages/DevOps.jsx'
 import Library from './pages/Library.jsx'
 import Mocks from './pages/Mocks.jsx'
 import Achievements from './pages/Achievements.jsx'
@@ -20,6 +21,7 @@ const PAGES = [
   { id: 'dsa', name: 'DSA', icon: Code2, el: DSA },
   { id: 'system-design', name: 'System design', icon: Network, el: SystemDesign },
   { id: 'ai-ml', name: 'AI/ML', icon: Brain, el: AIML },
+  { id: 'devops', name: 'DevOps', icon: Rocket, el: DevOps },
   { id: 'fundamentals', name: 'Fundamentals', icon: Cpu, el: Fundamentals },
   { id: 'library', name: 'Library', icon: BookOpen, el: Library },
   { id: 'mocks', name: 'Mock interviews', icon: Mic, el: Mocks },

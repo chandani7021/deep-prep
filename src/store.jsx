@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
 import confetti from 'canvas-confetti'
-import { LEVELS, PROJECT_MILESTONES, STORY_PROMPTS, RESOURCES } from './data/content.js'
+import { LEVELS, OPS_MILESTONES, PROJECT_MILESTONES, STORY_PROMPTS, RESOURCES } from './data/content.js'
+import { AREA_IDS, planFor } from './data/curriculum.js'
 import { PATTERNS, ALL_PROBLEMS } from './data/problems.js'
 import { connect as connectToGist, pull as pullGist, push as pushGist, readGistConfig, writeGistConfig } from './sync.js'
 
@@ -29,7 +30,7 @@ export const prettyDate = (k, opts = { month: 'short', day: 'numeric' }) => pars
 // ---------------------------------------------------------------- defaults
 const defaultState = () => ({
   version: 1,
-  profile: { name: '', startDate: dayKey(), dailyProblems: 2, dsaMode: 'patterns' },
+  profile: { name: '', startDate: dayKey(), dailyProblems: 2, dsaMode: 'patterns', planDays: 90, tracks: [...AREA_IDS], planSet: false },
   xp: 0,
   xpLog: [],
   activity: {}, // dayKey -> xp earned that day
@@ -43,6 +44,8 @@ const defaultState = () => ({
   aiTopics: {},
   project: {},
   fundTopics: {},
+  opsTopics: {},
+  opsProject: {},
   stories: {},
   mocks: [],
   weeks: {}, // n -> { goals: {track:true}, reflection: '' }
@@ -57,7 +60,9 @@ const defaultState = () => ({
 const normalize = (parsed) => {
   const base = defaultState()
   if (!parsed || typeof parsed !== 'object') return base
-  return { ...base, ...parsed, profile: { ...base.profile, ...(parsed.profile || {}) } }
+  const profile = { ...base.profile, ...(parsed.profile || {}) }
+  if (!Array.isArray(profile.tracks) || !profile.tracks.some((t) => AREA_IDS.includes(t))) profile.tracks = [...AREA_IDS]
+  return { ...base, ...parsed, profile }
 }
 
 const load = () => {
@@ -101,11 +106,19 @@ export const streakInfo = (state) => {
   return { current, longest, doneToday: on(today), canRepair }
 }
 
-export const planPosition = (startDate) => {
-  const day = Math.max(1, diffDays(startDate, dayKey()) + 1)
-  const week = Math.min(13, Math.ceil(day / 7))
-  const month = Math.min(3, Math.ceil(day / 30))
-  return { day, week, month, finished: day > 90 }
+/** Where you are in your plan. Pass state.profile. */
+export const planPosition = (profile) => {
+  const plan = planFor(profile)
+  const day = Math.max(1, diffDays(profile.startDate, dayKey()) + 1)
+  const week = Math.min(plan.totalWeeks, Math.ceil(day / 7))
+  const phase = plan.phaseOf(week)
+  return {
+    day, week, phase, plan,
+    phaseName: plan.phases[phase - 1].name,
+    totalDays: plan.days,
+    daysLeft: Math.max(0, plan.days - day + 1),
+    finished: day > plan.days,
+  }
 }
 
 export const allProblems = (state) => [
@@ -152,6 +165,7 @@ export const BADGES = [
   { id: 'book-5', name: 'Library card', desc: 'Finish 5 resources', icon: '📚', test: (s) => s.finished >= 5 },
   { id: 'review-20', name: 'Memory keeper', desc: 'Complete 20 spaced reviews', icon: '🧠', test: (s) => s.reviews >= 20 },
   { id: 'focus-10', name: 'Deep focus', desc: 'Complete 10 focus sessions', icon: '⏱️', test: (s) => s.focus >= 10 },
+  { id: 'ops-project', name: 'Pipeline pro', desc: 'Finish every DevOps project milestone', icon: '🛠️', test: (s) => s.opsProjectDone },
   { id: 'project', name: 'Shipped it', desc: 'Finish every AI project milestone', icon: '🚀', test: (s) => s.projectDone },
   { id: 'stories', name: 'Storyteller', desc: 'Write all 8 STAR stories', icon: '🗣️', test: (s) => s.stories >= STORY_PROMPTS.length },
   { id: 'level-5', name: 'Twilight diver', desc: 'Reach the Twilight zone', icon: '🌒', test: (s) => s.level >= 5 },
@@ -176,6 +190,7 @@ export const computeStats = (state) => {
     reviews: state.reviewsDone,
     focus: state.focusSessions,
     projectDone: PROJECT_MILESTONES.every((m) => state.project[m.id]),
+    opsProjectDone: OPS_MILESTONES.every((m) => state.opsProject?.[m.id]),
     stories: STORY_PROMPTS.filter((p) => {
       const s = state.stories[p.id]
       return s && s.s && s.a && s.r
@@ -386,7 +401,7 @@ export function StoreProvider({ children }) {
     prevLevel.current = lvl
   }, [state, toast])
 
-  const replaceState = useCallback((s) => setState({ ...defaultState(), ...s }), [])
+  const replaceState = useCallback((s) => setState(normalize(s)), [])
   const reset = useCallback(() => setState(defaultState()), [])
 
   return (

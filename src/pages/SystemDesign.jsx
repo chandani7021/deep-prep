@@ -2,6 +2,7 @@ import { Minus, Plus } from 'lucide-react'
 import { SD_PROBLEMS, SD_TOPICS } from '../data/content.js'
 import { celebrate, dayKey, planPosition, prettyDate, useStore } from '../store.jsx'
 import { Check, Ring, Stars } from '../components/ui.jsx'
+import ModuleList from '../components/Modules.jsx'
 
 const FRAMEWORK = [
   ['Clarify requirements', 'Functional and non-functional. Ask about scale, latency, consistency. 5 min.'],
@@ -15,7 +16,8 @@ const FRAMEWORK = [
 
 export default function SystemDesign() {
   const { state, act } = useStore()
-  const week = planPosition(state.profile.startDate).week
+  const { week, plan } = planPosition(state.profile)
+  const pw = (id) => plan.firstWeek[id]
   const topicsDone = SD_TOPICS.filter((t) => state.sdTopics[t.id]).length
   const designs = SD_PROBLEMS.filter((p) => state.sdProblems[p.id]?.count > 0).length
 
@@ -41,11 +43,13 @@ export default function SystemDesign() {
       <div className="row">
         <div style={{ flex: 1, minWidth: 260 }}>
           <h1>System design</h1>
-          <p className="muted">Learn the building blocks in month 1, then design systems out loud. Practise each design more than once.</p>
+          <p className="muted">Learn the building blocks first, then design systems out loud. Practise each design more than once.</p>
         </div>
         <Ring value={topicsDone / SD_TOPICS.length} size={64} label={`${topicsDone}`} />
         <Ring value={designs / SD_PROBLEMS.length} size={64} label={`${designs}`} color="var(--glow)" />
       </div>
+
+      <ModuleList track="sd" />
 
       <section className="panel">
         <div className="panel-head"><h2>The interview framework</h2><span className="muted small">Use it for every design, every time</span></div>
@@ -74,11 +78,11 @@ export default function SystemDesign() {
         {SD_PROBLEMS.map((p) => {
           const d = state.sdProblems[p.id] || { count: 0, rating: 0, notes: '' }
           return (
-            <div key={p.id} style={{ padding: '14px 18px', borderTop: '1px solid var(--line)', background: p.week === week ? 'rgba(61,139,253,0.07)' : undefined }}>
+            <div key={p.id} style={{ padding: '14px 18px', borderTop: '1px solid var(--line)', background: pw(p.id) === week ? 'rgba(61,139,253,0.07)' : undefined }}>
               <div className="row">
                 <div style={{ flex: 1, minWidth: 200 }}>
                   <div style={{ fontWeight: 600 }}>{p.name}</div>
-                  <div className="small dim">{p.level} · week {p.week}{p.week === week ? ' · this week' : ''}{d.last ? ` · last ${prettyDate(d.last)}` : ''}</div>
+                  <div className="small dim">{p.level}{pw(p.id) ? ` · week ${pw(p.id)}` : ''}{pw(p.id) === week ? ' · this week' : ''}{d.last ? ` · last ${prettyDate(d.last)}` : ''}</div>
                 </div>
                 <Stars value={d.rating} onChange={(n) => update(p, { rating: n })} label={`Confidence for ${p.name}`} />
                 <div className="stepper">

@@ -4,7 +4,7 @@
 
 export const PATTERNS = [
   {
-    id: 'arrays-hashing', name: 'Arrays & Hashing', week: 1,
+    id: 'arrays-hashing', name: 'Arrays & Hashing',
     when: 'You need fast lookups, counting, grouping, or "have I seen this before?"',
     key: 'Trade space for time with a hash map or set. Count frequencies, store index of value, group by a computed key.',
     problems: [
@@ -19,7 +19,7 @@ export const PATTERNS = [
     ],
   },
   {
-    id: 'two-pointers', name: 'Two Pointers', week: 1,
+    id: 'two-pointers', name: 'Two Pointers',
     when: 'Sorted input, pairs/triplets, or comparing from both ends.',
     key: 'Move left/right pointers toward each other based on a comparison. Sort first if order does not matter.',
     problems: [
@@ -31,7 +31,7 @@ export const PATTERNS = [
     ],
   },
   {
-    id: 'sliding-window', name: 'Sliding Window', week: 2,
+    id: 'sliding-window', name: 'Sliding Window',
     when: 'Contiguous subarray/substring with a constraint: longest, shortest, contains.',
     key: 'Expand right; while window invalid, shrink left. Track window state with a map or counter.',
     problems: [
@@ -44,7 +44,7 @@ export const PATTERNS = [
     ],
   },
   {
-    id: 'stack', name: 'Stack & Monotonic Stack', week: 2,
+    id: 'stack', name: 'Stack & Monotonic Stack',
     when: 'Matching pairs, "next greater/smaller element", evaluating expressions.',
     key: 'Push until a condition breaks, then pop and resolve. Monotonic stack keeps elements in sorted order.',
     problems: [
@@ -58,7 +58,7 @@ export const PATTERNS = [
     ],
   },
   {
-    id: 'binary-search', name: 'Binary Search', week: 3,
+    id: 'binary-search', name: 'Binary Search',
     when: 'Sorted data, or "find the minimum X such that condition(X) is true".',
     key: 'Shrink the search space by half. Binary search on the answer when the condition is monotonic.',
     problems: [
@@ -72,7 +72,7 @@ export const PATTERNS = [
     ],
   },
   {
-    id: 'linked-list', name: 'Linked List & Fast/Slow Pointers', week: 3,
+    id: 'linked-list', name: 'Linked List & Fast/Slow Pointers',
     when: 'Pointer manipulation, cycle detection, finding the middle.',
     key: 'Use a dummy head. Fast/slow pointers detect cycles and find midpoints.',
     problems: [
@@ -89,7 +89,7 @@ export const PATTERNS = [
     ],
   },
   {
-    id: 'prefix-sum', name: 'Prefix Sum', week: 4,
+    id: 'prefix-sum', name: 'Prefix Sum',
     when: 'Range sums, or counting subarrays that sum to a target.',
     key: 'prefix[i] = sum of first i elements. Store prefix counts in a map to find target differences.',
     problems: [
@@ -100,7 +100,7 @@ export const PATTERNS = [
     ],
   },
   {
-    id: 'trees', name: 'Trees (DFS & BFS)', week: 5,
+    id: 'trees', name: 'Trees (DFS & BFS)',
     when: 'Hierarchical data. Ask: do I need info from children (post-order) or parents (pre-order)?',
     key: 'Recursive DFS returning values up the tree; BFS with a queue for level-by-level.',
     problems: [
@@ -122,7 +122,7 @@ export const PATTERNS = [
     ],
   },
   {
-    id: 'tries', name: 'Tries', week: 6,
+    id: 'tries', name: 'Tries',
     when: 'Prefix searches, autocomplete, word dictionaries.',
     key: 'Each node holds children map + end-of-word flag. Combine with DFS for wildcard/board search.',
     problems: [
@@ -132,7 +132,7 @@ export const PATTERNS = [
     ],
   },
   {
-    id: 'heap', name: 'Heap / Top-K', week: 7,
+    id: 'heap', name: 'Heap / Top-K',
     when: '"K largest/smallest/closest", streaming medians, scheduling.',
     key: 'Min-heap of size K for top-K largest. Two heaps for running median.',
     problems: [
@@ -146,7 +146,7 @@ export const PATTERNS = [
     ],
   },
   {
-    id: 'backtracking', name: 'Backtracking', week: 7,
+    id: 'backtracking', name: 'Backtracking',
     when: 'Generate all combinations/permutations/subsets, or search with constraints.',
     key: 'choose → explore → un-choose. Prune early. Sort first to skip duplicates.',
     problems: [
@@ -162,7 +162,7 @@ export const PATTERNS = [
     ],
   },
   {
-    id: 'graphs', name: 'Graphs (BFS/DFS, Topo Sort)', week: 8,
+    id: 'graphs', name: 'Graphs (BFS/DFS, Topo Sort)',
     when: 'Grids, connections, dependencies, shortest path in unweighted graphs.',
     key: 'Adjacency list + visited set. BFS for shortest unweighted path; Kahn’s algorithm for ordering.',
     problems: [
@@ -178,7 +178,7 @@ export const PATTERNS = [
     ],
   },
   {
-    id: 'union-find', name: 'Union-Find', week: 8,
+    id: 'union-find', name: 'Union-Find',
     when: 'Dynamic connectivity, grouping, detecting cycles in undirected graphs.',
     key: 'parent[] with path compression + union by rank. Count components as unions succeed.',
     problems: [
@@ -188,7 +188,7 @@ export const PATTERNS = [
     ],
   },
   {
-    id: 'adv-graphs', name: 'Weighted Graphs (Dijkstra, MST)', week: 11,
+    id: 'adv-graphs', name: 'Weighted Graphs (Dijkstra, MST)',
     when: 'Shortest path with weights, minimum spanning tree.',
     key: 'Dijkstra = BFS with a min-heap. Prim/Kruskal for MST. Bellman-Ford for K-stop limits.',
     problems: [
@@ -200,7 +200,7 @@ export const PATTERNS = [
     ],
   },
   {
-    id: 'dp-1d', name: '1-D Dynamic Programming', week: 9,
+    id: 'dp-1d', name: '1-D Dynamic Programming',
     when: 'Optimal value or count of ways, where answer at i depends on smaller i.',
     key: 'Define dp[i] in words first. Write recurrence, then base cases, then optimize space.',
     problems: [
@@ -219,7 +219,7 @@ export const PATTERNS = [
     ],
   },
   {
-    id: 'dp-2d', name: '2-D Dynamic Programming', week: 10,
+    id: 'dp-2d', name: '2-D Dynamic Programming',
     when: 'Two sequences, grids, or knapsack-style choices.',
     key: 'dp[i][j] over two indices. Draw the table on paper before coding.',
     problems: [
@@ -234,7 +234,7 @@ export const PATTERNS = [
     ],
   },
   {
-    id: 'greedy', name: 'Greedy', week: 10,
+    id: 'greedy', name: 'Greedy',
     when: 'A locally best choice provably leads to the global best.',
     key: 'Prove (or sanity-check) the greedy choice with a counterexample hunt before coding.',
     problems: [
@@ -248,7 +248,7 @@ export const PATTERNS = [
     ],
   },
   {
-    id: 'intervals', name: 'Intervals', week: 11,
+    id: 'intervals', name: 'Intervals',
     when: 'Overlapping ranges, scheduling, merging.',
     key: 'Sort by start (or end). Compare current with last merged interval.',
     problems: [
@@ -259,7 +259,7 @@ export const PATTERNS = [
     ],
   },
   {
-    id: 'math-bits', name: 'Math, Matrix & Bits', week: 11,
+    id: 'math-bits', name: 'Math, Matrix & Bits',
     when: 'Matrix traversal, number tricks, XOR properties.',
     key: 'For matrices, track boundaries. For bits, remember x & (x-1) and XOR cancels pairs.',
     problems: [

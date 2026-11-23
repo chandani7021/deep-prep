@@ -56,7 +56,7 @@ export default function Achievements() {
           <section className="panel">
             <div className="panel-head"><h2>How to earn depth</h2></div>
             <div className="small" style={{ display: 'grid', gap: 4 }}>
-              {[['Daily task', '10–60 m'], ['Clean sweep (all daily tasks)', '+50 m'], ['Easy / Medium / Hard problem', '10 / 20 / 35 m'], ['Spaced review', '10 m'], ['System design session', '50 m'], ['Weekly goal / full week', '25 / +75 m'], ['Mock interview', '60 m'], ['Finish a book or course', '+100 m'], ['Focus session', '½ m per minute'], ['Ship the AI project', '+200 m']].map(([a, b]) => (
+              {[['Daily task', '10–60 m'], ['Clean sweep (all daily tasks)', '+50 m'], ['Easy / Medium / Hard problem', '10 / 20 / 35 m'], ['Spaced review', '10 m'], ['System design session', '50 m'], ['Weekly goal / full week', '25 / +75 m'], ['Mock interview', '60 m'], ['Finish a book or course', '+100 m'], ['Focus session', '½ m per minute'], ['DevOps topic / project milestone', '10 / 30 m'], ['Ship the AI project or DevOps project', '+200 m']].map(([a, b]) => (
                 <div key={a} className="row" style={{ borderTop: '1px solid var(--line)', padding: '5px 0' }}><span style={{ flex: 1 }}>{a}</span><span className="chip xp">{b}</span></div>
               ))}
             </div>

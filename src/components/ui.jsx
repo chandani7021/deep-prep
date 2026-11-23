@@ -1,6 +1,7 @@
 import { Check as CheckIcon } from 'lucide-react'
 import { LEVELS } from '../data/content.js'
-import { addDays, dayKey, diffDays, levelFor, prettyDate, useStore } from '../store.jsx'
+import { addDays, dayKey, levelFor, prettyDate, useStore } from '../store.jsx'
+import { planFor } from '../data/curriculum.js'
 
 export function Check({ on, small, label }) {
   return (
@@ -44,12 +45,13 @@ export function Stars({ value = 0, onChange, label = 'Confidence' }) {
   )
 }
 
-/** 90-day "dive log" heatmap */
+/** Activity heatmap across the whole plan */
 export function DiveLog() {
   const { state } = useStore()
   const start = state.profile.startDate
   const today = dayKey()
-  const cells = Array.from({ length: 90 }, (_, i) => {
+  const total = planFor(state.profile).days
+  const cells = Array.from({ length: total }, (_, i) => {
     const k = addDays(start, i)
     const xp = state.activity[k] || 0
     const l = xp === 0 ? 0 : xp < 40 ? 1 : xp < 100 ? 2 : xp < 180 ? 3 : 4
@@ -57,7 +59,7 @@ export function DiveLog() {
   })
   return (
     <div>
-      <div className="dive-log" role="img" aria-label="Activity over your 90-day plan">
+      <div className="dive-log" role="img" aria-label={`Activity over your ${total}-day plan`}>
         {cells.map((c, i) => (
           <span key={c.k}
             className={`dive-cell ${c.frozen ? 'frozen' : ''} ${c.future ? 'future' : ''} ${c.isToday ? 'today' : ''}`}
@@ -110,4 +112,3 @@ export function Toasts() {
   )
 }
 
-export const daysLeft = (start) => Math.max(0, 90 - diffDays(start, dayKey()))

@@ -3,10 +3,12 @@ import { AI_SECTIONS, PROJECT_MILESTONES, RESOURCES } from '../data/content.js'
 import { celebrate, planPosition, useStore } from '../store.jsx'
 import { Check, Progress, Ring } from '../components/ui.jsx'
 import TopicGrid from '../components/TopicGrid.jsx'
+import ModuleList from '../components/Modules.jsx'
 
 export default function AIML({ go }) {
   const { state, act } = useStore()
-  const { month, week } = planPosition(state.profile.startDate)
+  const { week, plan } = planPosition(state.profile)
+  const pw = (id) => plan.firstWeek[id]
   const all = AI_SECTIONS.flatMap((s) => s.topics)
   const done = all.filter(([id]) => state.aiTopics[id]).length
   const projDone = PROJECT_MILESTONES.filter((m) => state.project[m.id]).length
@@ -23,17 +25,19 @@ export default function AIML({ go }) {
       <div className="row">
         <div style={{ flex: 1, minWidth: 260 }}>
           <h1>AI / ML</h1>
-          <p className="muted">Classic ML in month 1, deep learning in month 2, LLM engineering and ML system design in month 3. One real project ties it together.</p>
+          <p className="muted">Classic ML, then deep learning, then LLM engineering and ML system design. One real project ties it together.</p>
         </div>
         <Ring value={done / all.length} size={64} label={`${done}`} color="var(--c-ai)" />
       </div>
 
+      <ModuleList track="ai" />
+
       {AI_SECTIONS.map((s) => {
         const d = s.topics.filter(([id]) => state.aiTopics[id]).length
         return (
-          <section key={s.id} className="panel" style={s.month === month ? { borderColor: 'rgba(154,168,255,.5)' } : undefined}>
+          <section key={s.id} className="panel">
             <div className="panel-head">
-              <div><h2>{s.name}</h2><p className="muted small">Month {s.month}{s.month === month ? ' · now' : ''} · check off when you could explain it in an interview. +15 m</p></div>
+              <div><h2>{s.name}</h2><p className="muted small">Check off when you could explain it in an interview. +15 m</p></div>
               <span className="chip">{d}/{s.topics.length}</span>
             </div>
             <TopicGrid topics={s.topics} storeKey="aiTopics" />
@@ -55,7 +59,7 @@ export default function AIML({ go }) {
                 onKeyDown={(e) => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); toggleMilestone(m) } }}>
                 <Check on={on} small />
                 <div style={{ flex: 1 }}><div className="ci-text">{m.label}</div></div>
-                <span className="small" style={{ color: m.week === week ? 'var(--glow)' : 'var(--dim)' }}>Week {m.week}</span>
+                {pw(m.id) && <span className="small" style={{ color: pw(m.id) === week ? 'var(--glow)' : 'var(--dim)' }}>Week {pw(m.id)}</span>}
               </div>
             )
           })}

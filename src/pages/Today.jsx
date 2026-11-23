@@ -1,19 +1,19 @@
 import { useState } from 'react'
 import { ExternalLink, Play, Plus, Trash2 } from 'lucide-react'
-import { MONTHS, QUOTES, RESOURCES, SD_PROBLEMS, AI_SECTIONS, TRACKS, WEEKS, tasksForDay } from '../data/content.js'
+import { QUOTES, RESOURCES, SD_PROBLEMS, AI_SECTIONS, TRACKS, tasksForDay } from '../data/content.js'
+import { CURRICULUM } from '../data/curriculum.js'
 import { PATTERNS, lcUrl } from '../data/problems.js'
 import { addDays, celebrate, dayKey, dueReviews, planPosition, problemActions, streakInfo, useStore } from '../store.jsx'
-import { Check, DiffChip, DiveLog, daysLeft } from '../components/ui.jsx'
+import { Check, DiffChip, DiveLog } from '../components/ui.jsx'
 import { useFocus } from '../components/Focus.jsx'
 
 export default function Today({ go }) {
   const { state, act } = useStore()
   const focus = useFocus()
   const today = dayKey()
-  const pos = planPosition(state.profile.startDate)
-  const week = WEEKS[pos.week - 1]
-  const month = MONTHS[pos.month - 1]
-  const tasks = tasksForDay(new Date())
+  const pos = planPosition(state.profile)
+  const week = pos.plan.weeks[pos.week - 1]
+  const tasks = tasksForDay(new Date(), pos.plan.tracks)
   const day = state.days[today] || { tasks: {}, custom: [] }
   const doneCount = tasks.filter((t) => day.tasks[t.id]).length
   const streak = streakInfo(state)
@@ -60,9 +60,9 @@ export default function Today({ go }) {
     <div className="page">
       <section className="hero">
         <div>
-          <div className="hero-day">{pos.finished ? 'Done' : `Day ${pos.day}`}<small>of 90</small></div>
+          <div className="hero-day">{pos.finished ? 'Done' : `Day ${pos.day}`}<small>of {pos.totalDays}</small></div>
           <p className="hero-sub">
-            Week {pos.week}, month {pos.month}: {month.name}. {daysLeft(state.profile.startDate)} days left.
+            Week {pos.week} of {pos.plan.totalWeeks}, {pos.phaseName.toLowerCase()} phase. {pos.daysLeft} days left.
             {state.profile.name ? ` Keep going, ${state.profile.name}.` : ''}
           </p>
           <p className="hero-quote">{quote}</p>
@@ -72,6 +72,14 @@ export default function Today({ go }) {
           <div className="muted">day streak{streak.doneToday ? '' : streak.current ? ' · do one task to keep it' : ' · check off a task to start one'}</div>
         </div>
       </section>
+
+      {!state.profile.planSet && (
+        <div className="banner">
+          <span style={{ fontSize: 22 }} aria-hidden="true">🗺️</span>
+          <span style={{ flex: 1 }}>Choose how many days you want to prepare and which areas to include. Your weekly modules and daily tasks follow that plan.</span>
+          <button className="btn primary" onClick={() => go('roadmap')}>Set up my plan</button>
+        </div>
+      )}
 
       {streak.canRepair && (
         <div className="banner">
@@ -133,25 +141,28 @@ export default function Today({ go }) {
             </form>
           </section>
 
-          <NextUp week={pos.week} month={pos.month} go={go} />
+          <NextUp pos={pos} go={go} />
           <ReviewQueue />
         </div>
 
         <div className="stack">
           <section className="panel">
-            <div className="panel-head"><h2>Dive log</h2><span className="muted small">90 days</span></div>
+            <div className="panel-head"><h2>Dive log</h2><span className="muted small">{pos.totalDays} days</span></div>
             <DiveLog />
           </section>
 
           <section className="panel">
             <div className="panel-head">
-              <h2>Week {week.n} focus</h2>
+              <h2>Week {week.n} focus{week.review ? ' · review' : ''}</h2>
               <button className="btn sm ghost" onClick={() => go('roadmap')}>Roadmap</button>
             </div>
-            {[['dsa', week.dsa], ['sd', week.sd], ['ai', week.ai], ['fund', week.fund]].map(([k, text]) => (
+            {pos.plan.tracks.map((k) => (
               <div key={k} style={{ display: 'grid', gridTemplateColumns: '108px 1fr', gap: 10, padding: '7px 0', borderTop: '1px solid var(--line)' }}>
                 <span className="small" style={{ color: TRACKS[k].color, fontWeight: 600 }}>{TRACKS[k].name}</span>
-                <span className="small">{text}</span>
+                <span className="small">
+                  {(week.items[k] || []).map((x) => x.module.title + (x.parts > 1 ? ` (${x.part}/${x.parts})` : '')).join(' + ')}
+                  {(week.items[k] || [])[0]?.module.practice && <span className="muted" style={{ display: 'block' }}>{week.items[k][0].module.practice}</span>}
+                </span>
               </div>
             ))}
           </section>
@@ -167,16 +178,19 @@ export default function Today({ go }) {
   )
 }
 
-function NextUp({ week, month, go }) {
+function NextUp({ pos, go }) {
+  const { week, plan } = pos
   const { state, act } = useStore()
   const pa = problemActions(act)
   const isDone = (slug) => state.problems[slug]?.status && state.problems[slug].status !== 'todo'
 
+  const wk = (id) => plan.firstWeek[id] || 999
+  const has = (t) => plan.tracks.includes(t)
   // DSA: this week's patterns first, then any earlier unfinished pattern, then anything left
   const ordered = [
-    ...PATTERNS.filter((p) => p.week === week),
-    ...PATTERNS.filter((p) => p.week < week),
-    ...PATTERNS.filter((p) => p.week > week),
+    ...PATTERNS.filter((p) => wk(p.id) === week),
+    ...PATTERNS.filter((p) => wk(p.id) < week),
+    ...PATTERNS.filter((p) => wk(p.id) > week),
   ]
   const next = []
   for (const p of ordered) {
@@ -186,18 +200,20 @@ function NextUp({ week, month, go }) {
     if (next.length >= state.profile.dailyProblems) break
   }
 
-  const sd = SD_PROBLEMS.find((p) => p.week <= week && !(state.sdProblems[p.id]?.count > 0)) || SD_PROBLEMS.find((p) => !(state.sdProblems[p.id]?.count > 0))
-  const aiTopic = AI_SECTIONS.filter((s) => s.month <= month).flatMap((s) => s.topics.map(([id, name]) => ({ id, name, section: s.name }))).find((t) => !state.aiTopics[t.id])
-  const reading = RESOURCES.find((r) => r.must && state.resources[r.id]?.current > 0 && !state.resources[r.id]?.done)
-    || RESOURCES.find((r) => r.must && !state.resources[r.id]?.current)
+  const sd = has('sd') && (SD_PROBLEMS.find((p) => wk(p.id) <= week && !(state.sdProblems[p.id]?.count > 0)) || SD_PROBLEMS.find((p) => !(state.sdProblems[p.id]?.count > 0)))
+  const aiTopic = has('ai') && AI_SECTIONS.flatMap((s) => s.topics.map(([id, name]) => ({ id, name, section: s.name }))).find((t) => !state.aiTopics[t.id])
+  const opsTopic = has('ops') && CURRICULUM.ops.filter((m) => wk(m.id) <= week).flatMap((m) => m.topics.map(([id, name]) => ({ id, name, section: m.title }))).find((t) => !state.opsTopics?.[t.id])
+  const mine = (r) => r.must && has(r.track)
+  const reading = RESOURCES.find((r) => mine(r) && state.resources[r.id]?.current > 0 && !state.resources[r.id]?.done)
+    || RESOURCES.find((r) => mine(r) && !state.resources[r.id]?.current)
 
   return (
     <section className="panel">
       <div className="panel-head"><h2>Next up</h2><span className="muted small">Picked from where you are</span></div>
 
-      <h3 className="small" style={{ color: 'var(--c-dsa)', marginBottom: 6 }}>Today’s problems</h3>
-      {next.length === 0 && <p className="muted small">Every listed problem is solved. Add your own on the DSA page or clear your review queue.</p>}
-      {next.map((p) => (
+      {has('dsa') && <h3 className="small" style={{ color: 'var(--c-dsa)', marginBottom: 6 }}>Today’s problems</h3>}
+      {has('dsa') && next.length === 0 && <p className="muted small">Every listed problem is solved. Add your own on the DSA page or clear your review queue.</p>}
+      {has('dsa') && next.map((p) => (
         <div key={p.slug} className="row" style={{ padding: '8px 0', borderTop: '1px solid var(--line)' }}>
           <div style={{ flex: 1, minWidth: 180 }}>
             <a href={p.url} target="_blank" rel="noreferrer" style={{ fontWeight: 600 }}>{p.title} <ExternalLink size={12} /></a>
@@ -218,6 +234,11 @@ function NextUp({ week, month, go }) {
         {aiTopic && (
           <button className="task" style={{ textAlign: 'left', width: '100%' }} onClick={() => go('ai-ml')}>
             <div className="task-body"><span className="small" style={{ color: 'var(--c-ai)', fontWeight: 600 }}>AI/ML · {aiTopic.section}</span><div className="task-label">{aiTopic.name}</div></div>
+          </button>
+        )}
+        {opsTopic && (
+          <button className="task" style={{ textAlign: 'left', width: '100%' }} onClick={() => go('devops')}>
+            <div className="task-body"><span className="small" style={{ color: 'var(--c-ops)', fontWeight: 600 }}>DevOps · {opsTopic.section}</span><div className="task-label">{opsTopic.name}</div></div>
           </button>
         )}
         {reading && (

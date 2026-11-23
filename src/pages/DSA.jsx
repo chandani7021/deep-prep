@@ -3,6 +3,7 @@ import { ChevronDown, ChevronRight, ExternalLink, NotebookPen, Plus, RotateCcw, 
 import { PATTERNS } from '../data/problems.js'
 import { allProblems, celebrate, dayKey, dueReviews, planPosition, prettyDate, problemActions, useStore } from '../store.jsx'
 import { DiffChip, Progress, Ring } from '../components/ui.jsx'
+import ModuleList from '../components/Modules.jsx'
 
 export default function DSA() {
   const { state, act } = useStore()
@@ -41,6 +42,7 @@ export default function DSA() {
       </div>
       <p className="small muted" style={{ marginTop: -10 }}>{mastered} mastered · {due.length} due for review</p>
 
+      {mode === 'patterns' && <ModuleList track="dsa" />}
       {mode === 'patterns' && <PatternView />}
       {mode === 'all' && <FlatView />}
       {mode === 'review' && (
@@ -56,8 +58,9 @@ export default function DSA() {
 
 function PatternView() {
   const { state } = useStore()
-  const week = planPosition(state.profile.startDate).week
-  const current = PATTERNS.filter((p) => p.week === week).map((p) => p.id)
+  const { week, plan } = planPosition(state.profile)
+  const pw = (id) => plan.firstWeek[id]
+  const current = PATTERNS.filter((p) => pw(p.id) === week).map((p) => p.id)
   const [open, setOpen] = useState(() => new Set(current.length ? current : [PATTERNS[0].id]))
   const toggle = (id) => setOpen((o) => { const n = new Set(o); n.has(id) ? n.delete(id) : n.add(id); return n })
   const custom = state.customProblems
@@ -77,7 +80,7 @@ function PatternView() {
               {isOpen ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
               <div>
                 <h3>{p.name} {done === list.length && <span aria-label="complete">✅</span>}</h3>
-                <div className="small dim">Pattern {i + 1} · planned for week {p.week}{current.includes(p.id) ? ' · this week' : ''}</div>
+                <div className="small dim">Pattern {i + 1} · {pw(p.id) ? `planned for week ${pw(p.id)}` : 'not in your plan'}{current.includes(p.id) ? ' · this week' : ''}</div>
               </div>
               <Progress value={done / list.length} />
               <span className="chip">{done}/{list.length}</span>

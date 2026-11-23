@@ -1,17 +1,18 @@
 # Deep Prep 🌊
 
-A 90-day interview prep tracker for DSA, system design, AI/ML and CS fundamentals.
+An interview prep tracker for DSA, system design, AI/ML, DevOps and CS fundamentals. You choose the plan length (14–365 days) and the areas.
 Every bit of work takes you deeper: XP is measured in metres, levels go from the Shoreline to Challenger Deep.
 
 ## What's inside
 
-- **Today**: day X of 90, daily tasks (weekday / Saturday / Sunday schedules), next problems picked for you, review queue, 90-day dive log, reflection.
-- **Roadmap**: monthly goals and a 13-week plan with weekly check-offs and weekly reviews.
+- **Today**: day X of your plan, daily tasks (weekday / Saturday / Sunday schedules), next problems picked for you, review queue, 90-day dive log, reflection.
+- **Roadmap**: plan setup (length, start date, areas), phases, and a week-by-week plan where each area's module has topics, practice and the best resources.
+- **DevOps & delivery**: CI/CD, Docker, deployment strategies, Kubernetes, IaC/GitOps, database migrations and operations, observability, supply-chain security, plus a ship-it project.
 - **DSA**: 19 patterns, ~150 LeetCode problems (NeetCode 150 ones tagged `NC`), spaced repetition (3 → 6 → 12 → 24 days → mastered), notes per problem, add your own problems.
 - **System design**: interview framework, 20 building blocks, 16 practice designs (including AI/ML systems) with session counts and confidence ratings.
 - **AI/ML**: classic ML → deep learning → LLM engineering → ML system design, plus RAG project milestones.
 - **Fundamentals**: networking, OS, databases, code design, and 8 STAR story templates.
-- **Library**: books, courses and videos with progress counters and "where I left off" notes.
+- **Library**: books, courses and videos (including trending tech: AI agents & MCP, Kubernetes, Terraform, Go, Rust, Kafka, OpenTelemetry) with progress counters and "where I left off" notes.
 - **Mock interviews**: log sessions with ratings and takeaways.
 - **Achievements**: 28 badges, depth levels, streak freezes, focus timer rewards.
 
@@ -52,6 +53,7 @@ The workflow in `.github/workflows/deploy.yml` builds and deploys on every push 
 
 ## Customising
 
-- Plan, tasks, resources, topics, levels: `src/data/content.js`
+- Modules per area and how they are spread over your plan: `src/data/curriculum.js`
+- Daily tasks, resources, topics, levels: `src/data/content.js`
 - DSA patterns and problems: `src/data/problems.js`
 - Colours and fonts: the variables at the top of `src/styles.css`

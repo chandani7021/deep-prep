@@ -19,6 +19,8 @@
   --c-sd: #6fd3ff;
   --c-ai: #9aa8ff;
   --c-fund: #4fc3c7;
+  --c-ops: #ffb37a;
+  --c-trend: #e59bff;
   --font-display: 'Bricolage Grotesque', 'Segoe UI', system-ui, sans-serif;
   --font-body: 'IBM Plex Sans', 'Segoe UI', system-ui, -apple-system, sans-serif;
   color-scheme: dark;
@@ -388,4 +390,33 @@ details.notes summary { cursor: pointer; color: var(--muted); font-size: 13px; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; animation: none !important; }
+}
+
+/* ---------------------------------------------------------------- modules & plan setup */
+.module { border-top: 1px solid var(--line); padding: 10px 0; }
+.module > summary { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; cursor: pointer; list-style: none; }
+.module > summary::-webkit-details-marker { display: none; }
+.module > summary::before { content: '▸'; color: var(--dim); width: 10px; transition: transform 0.15s; }
+.module[open] > summary::before { transform: rotate(90deg); }
+.module.current > summary .module-title { color: var(--foam); }
+.module-n { font-family: var(--font-display); font-weight: 800; color: var(--dim); min-width: 18px; }
+.module-title { font-weight: 600; flex: 1; min-width: 160px; }
+.module-body { display: grid; gap: 8px; padding: 10px 0 4px 38px; }
+.module-topics { margin: 0; padding-left: 18px; color: var(--muted); font-size: 14px; display: grid; gap: 3px; }
+.module-links { display: flex; flex-wrap: wrap; gap: 6px 14px; }
+
+.plan-setup { display: grid; gap: 14px; }
+.preset-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.preset-row .btn[aria-pressed='true'] { background: var(--signal-strong); border-color: var(--signal-strong); color: #fff; }
+.area-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; }
+.week-track { border-radius: 10px; border: 1px solid var(--line); padding: 10px 12px; }
+.week-track.on { background: rgba(61, 139, 253, 0.1); }
+.week-track > summary { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; list-style: none; }
+.week-track > summary::-webkit-details-marker { display: none; }
+.week-track .module-body { padding-left: 32px; }
+.week-goals { grid-template-columns: 1fr; }
+.month-tabs { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+@media (max-width: 640px) {
+  .module-body { padding-left: 0; }
+  .week-track .module-body { padding-left: 0; }
 }
