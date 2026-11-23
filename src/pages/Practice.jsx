@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Bot, Mic, MicOff, RefreshCw, Send, Sparkles, Square, Timer } from 'lucide-react'
 import { FOLLOW_UPS, KINDS, PHASES, analyzeAnswer, pickQuestion } from '../data/practice.js'
-import { AI_MODEL, aiErrorMessage, getAiFeedback, hasAiKey, interviewerTurn, textOf } from '../lib/ai.js'
+import { aiErrorMessage, aiLabel, aiReady, getAiFeedback, interviewerTurn, textOf } from '../lib/ai.js'
 import { useSpeech } from '../lib/speech.js'
 import { celebrate, dayKey, planPosition, prettyDate, useStore } from '../store.jsx'
 import EditableLink from '../components/EditableLink.jsx'
@@ -19,7 +19,7 @@ export default function Practice({ go }) {
         <h1>Interview practice</h1>
         <p className="muted" style={{ maxWidth: '72ch' }}>
           Practise out loud. Speak (your browser turns it into text) or type, then get feedback.
-          The instant feedback works offline and checks structure and delivery. For feedback on whether your answer is actually right, and a live AI interviewer, add your own Anthropic API key in Settings (optional).
+          The instant feedback works offline and checks structure and delivery. For feedback on whether your answer is actually right, and a live AI interviewer, add a free Groq or Gemini key (or an Anthropic key) in Settings (optional).
         </p>
       </div>
 
@@ -31,10 +31,10 @@ export default function Practice({ go }) {
 
       {mode === 'explain' && <Session kind="explain" key="explain" />}
       {mode === 'mock' && <MockSetup />}
-      {mode === 'ai' && (hasAiKey() ? <AiInterview /> : (
+      {mode === 'ai' && (aiReady('interview') ? <AiInterview /> : (
         <section className="panel">
           <h2>AI interviewer needs an API key</h2>
-          <p className="small muted" style={{ marginTop: 6 }}>The AI interviewer talks with you turn by turn and scores you at the end. It runs on your own Anthropic API key (you pay Anthropic directly, a few cents per interview). Without a key, use “Mock interview”: it has a timer, phases and interviewer follow-ups, with offline feedback.</p>
+          <p className="small muted" style={{ marginTop: 6 }}>The AI interviewer talks with you turn by turn and scores you at the end. It needs an API key: a free Groq or Google Gemini key works (create one in a minute, no credit card), or a paid Anthropic key. Without a key, use “Mock interview”: it has a timer, phases and interviewer follow-ups, with offline feedback.</p>
           <div className="row" style={{ marginTop: 10 }}><button className="btn primary" onClick={() => go('settings')}>Add a key in Settings</button></div>
         </section>
       ))}
@@ -192,9 +192,9 @@ function Session({ kind }) {
 
       {result && (
         <div className="row" style={{ marginTop: 12 }}>
-          {hasAiKey()
+          {aiReady('feedback')
             ? <button className="btn primary" onClick={askAi} disabled={ai.status === 'loading' || result.words < 10}><Sparkles size={15} /> {ai.status === 'loading' ? 'Reviewing…' : 'Get AI feedback'}</button>
-            : <span className="small muted">Want feedback on correctness too? Add an Anthropic API key in Settings → AI feedback.</span>}
+            : <span className="small muted">Want feedback on correctness too? Add a free Groq or Gemini key in Settings → AI feedback.</span>}
           <button className="btn" onClick={logMock}>Log as a mock</button>
           <button className="btn" onClick={next}>Next question</button>
         </div>
@@ -246,7 +246,7 @@ function AiFeedbackView({ fb }) {
       </div>
       <details><summary className="small" style={{ cursor: 'pointer' }}>A stronger answer</summary><p className="small" style={{ whiteSpace: 'pre-wrap', marginTop: 6 }}>{fb.better_answer}</p></details>
       {fb.follow_ups?.length > 0 && <p className="small muted">Be ready for: {fb.follow_ups.map((f) => `“${f}”`).join('  ')}</p>}
-      <p className="small dim">Reviewed by {AI_MODEL} with your API key.</p>
+      <p className="small dim">Reviewed by {aiLabel('feedback')} with your API key. AI can be wrong; double-check anything surprising.</p>
     </div>
   )
 }
@@ -275,8 +275,8 @@ function AiInterview() {
   const turn = async (msgs, question = q) => {
     setBusy(true); setErr(''); setStreaming('')
     try {
-      const msg = await interviewerTurn({ kind, question: question.text, history: msgs, onText: (d) => setStreaming((s) => s + d) })
-      setHistory([...msgs, { role: 'assistant', content: msg.content }])
+      const content = await interviewerTurn({ kind, question: question.text, history: msgs, onText: (d) => setStreaming((s) => s + d) })
+      setHistory([...msgs, { role: 'assistant', content }])
     } catch (e) { setErr(aiErrorMessage(e)) }
     setStreaming(''); setBusy(false)
   }
@@ -304,7 +304,7 @@ function AiInterview() {
       const rating = Math.max(1, Math.min(5, Math.round(f.overall)))
       act((s) => {
         s.practice = [{ id: Date.now().toString(36), date: dayKey(), kind, question: q.text, seconds: Math.round(seconds), score: Math.round(f.overall * 20), ai: rating }, ...(s.practice || [])].slice(0, 200)
-        s.mocks.unshift({ id: Date.now().toString(36), date: dayKey(), type: KINDS[kind].name, platform: 'AI interviewer', rating, went: q.text, improve: f.improvements.slice(0, 2).join(' ') })
+        s.mocks.unshift({ id: Date.now().toString(36), date: dayKey(), type: KINDS[kind].name, platform: `AI interviewer (${aiLabel('interview')})`, rating, went: q.text, improve: f.improvements.slice(0, 2).join(' ') })
       }, { xp: 60, reason: 'AI mock interview' })
       celebrate(true)
     } catch (e) { setErr(aiErrorMessage(e)) }
@@ -330,7 +330,7 @@ function AiInterview() {
   return (
     <section className="panel practice">
       <div className="panel-head">
-        <div><span className="small" style={{ color: 'var(--glow)', fontWeight: 600 }}>AI interviewer · {KINDS[kind].name}</span><h2 style={{ marginTop: 2 }}>{q.text}</h2></div>
+        <div><span className="small" style={{ color: 'var(--glow)', fontWeight: 600 }}>AI interviewer · {KINDS[kind].name} · {aiLabel('interview')}</span><h2 style={{ marginTop: 2 }}>{q.text}</h2></div>
         <button className="btn sm" onClick={() => { setQ(null); setHistory([]); setFb(null) }}>New interview</button>
       </div>
       <div className="chat">

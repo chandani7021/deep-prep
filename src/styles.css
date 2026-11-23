@@ -497,3 +497,5 @@ details.notes summary { cursor: pointer; color: var(--muted); font-size: 13px; }
 .bubble p { margin: 2px 0 0; white-space: pre-wrap; }
 .bubble.assistant { background: var(--deep-2); justify-self: start; }
 .bubble.user { background: rgba(61, 139, 253, 0.18); justify-self: end; }
+
+.provider { display: grid; gap: 8px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--abyss); }

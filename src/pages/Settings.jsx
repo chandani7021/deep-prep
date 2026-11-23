@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import { Cloud, Download, ExternalLink, RefreshCw, Upload } from 'lucide-react'
 import { gistUrl } from '../sync.js'
-import { AI_MODEL, getAiKey, setAiKey } from '../lib/ai.js'
+import { PROVIDERS, getAiSettings, listModels, saveAiSettings } from '../lib/ai.js'
 import { useStore } from '../store.jsx'
 
 const STATUS = {
@@ -121,28 +121,89 @@ export default function Settings() {
 
 function AiKeySettings() {
   const { toast } = useStore()
-  const [key, setKey] = useState('')
-  const [saved, setSaved] = useState(() => !!getAiKey())
+  const [cfg, setCfg] = useState(getAiSettings)
+  const [drafts, setDrafts] = useState({})
+  const [models, setModels] = useState({})
+  const [busy, setBusy] = useState('')
+  const update = (patch) => setCfg(saveAiSettings(patch))
+  const saveKey = (p) => {
+    const k = (drafts[p] || '').trim()
+    if (!k) return
+    update({ keys: { ...cfg.keys, [p]: k } })
+    setDrafts({ ...drafts, [p]: '' })
+    toast(`${PROVIDERS[p].name} key saved in this browser`)
+  }
+  const removeKey = (p) => {
+    if (!window.confirm(`Remove the ${PROVIDERS[p].name} key from this browser?`)) return
+    const keys = { ...cfg.keys }; delete keys[p]
+    update({ keys })
+  }
+  const loadModels = async (p) => {
+    setBusy(p)
+    try { setModels({ ...models, [p]: await listModels(p, cfg.keys[p]) }); toast('Key works. Models loaded.') }
+    catch (e) { toast(e.message || 'Could not load models') }
+    setBusy('')
+  }
+  const useSelect = (use, label) => (
+    <label>
+      <span className="label">{label}</span>
+      <select className="select" style={{ width: 'auto' }} value={cfg[`${use}Provider`]} onChange={(e) => update({ [`${use}Provider`]: e.target.value })}>
+        {Object.entries(PROVIDERS).map(([id, p]) => <option key={id} value={id}>{p.name}{p.free ? ' (free tier)' : ' (paid)'}{cfg.keys[id] ? '' : ' · no key yet'}</option>)}
+      </select>
+    </label>
+  )
+
   return (
-    <section className="panel" style={{ display: 'grid', gap: 10 }}>
+    <section className="panel" style={{ display: 'grid', gap: 12 }}>
       <div className="panel-head"><div><h2>AI feedback (optional)</h2>
-        <p className="muted small">Adds AI feedback on your answers and a live AI interviewer on the Practice page. Uses your own Anthropic API key and model {AI_MODEL}; you pay Anthropic directly (typically a few cents per feedback, more for a long interview). Everything else in the app works without it.</p>
+        <p className="muted small">Adds AI feedback on your answers and a live AI interviewer on the Practice page. Groq and Google Gemini have free tiers (no credit card); Anthropic is paid. Everything else in the app works without any key.</p>
       </div></div>
-      {saved ? (
-        <div className="row">
-          <span className="small">✅ A key is saved in this browser.</span>
-          <button className="btn sm" onClick={() => { if (window.confirm('Remove the API key from this browser?')) { setAiKey(''); setSaved(false); toast('API key removed') } }}>Remove key</button>
-        </div>
-      ) : (
-        <form className="row" onSubmit={(e) => { e.preventDefault(); if (!key.trim()) return; setAiKey(key); setKey(''); setSaved(true); toast('API key saved in this browser') }}>
-          <input className="input" style={{ flex: 1, minWidth: 220 }} type="password" autoComplete="off" placeholder="sk-ant-…" value={key} onChange={(e) => setKey(e.target.value)} aria-label="Anthropic API key" />
-          <button className="btn primary" disabled={!key.trim()}>Save key</button>
-        </form>
-      )}
+
+      <div className="row" style={{ gap: 16 }}>
+        {useSelect('feedback', 'Use for answer feedback')}
+        {useSelect('interview', 'Use for the AI interviewer')}
+      </div>
+
+      {Object.entries(PROVIDERS).map(([id, p]) => {
+        const used = cfg.feedbackProvider === id || cfg.interviewProvider === id
+        return (
+          <div key={id} className="provider" style={used ? { borderColor: 'var(--signal)' } : undefined}>
+            <div className="row" style={{ gap: 8 }}>
+              <strong style={{ flex: 1 }}>{p.name} {p.free ? <span className="chip easy">Free tier</span> : <span className="chip">Paid</span>}</strong>
+              <a className="small" href={p.keyUrl} target="_blank" rel="noreferrer">Get a key</a>
+            </div>
+            <p className="small muted">{p.note}</p>
+            {cfg.keys[id] ? (
+              <div className="row" style={{ gap: 8 }}>
+                <span className="small">✅ Key saved</span>
+                <label className="row small" style={{ gap: 6 }}>Model
+                  {models[id]?.length ? (
+                    <select className="select" style={{ width: 'auto' }} value={cfg.models[id] || p.defaultModel} onChange={(e) => update({ models: { ...cfg.models, [id]: e.target.value } })}>
+                      {[...new Set([cfg.models[id] || p.defaultModel, ...models[id]])].map((m) => <option key={m} value={m}>{m}</option>)}
+                    </select>
+                  ) : (
+                    <input className="input" style={{ width: 230 }} defaultValue={cfg.models[id] || p.defaultModel} aria-label={`${p.name} model`}
+                      onBlur={(e) => update({ models: { ...cfg.models, [id]: e.target.value.trim() || p.defaultModel } })} />
+                  )}
+                </label>
+                {id !== 'anthropic' && <button className="btn sm" onClick={() => loadModels(id)} disabled={busy === id}>{busy === id ? 'Checking…' : 'Test key & list models'}</button>}
+                <button className="btn sm ghost" onClick={() => removeKey(id)}>Remove key</button>
+              </div>
+            ) : (
+              <form className="row" onSubmit={(e) => { e.preventDefault(); saveKey(id) }}>
+                <input className="input" style={{ flex: 1, minWidth: 200 }} type="password" autoComplete="off" placeholder={p.keyHint} value={drafts[id] || ''}
+                  onChange={(e) => setDrafts({ ...drafts, [id]: e.target.value })} aria-label={`${p.name} API key`} />
+                <button className="btn primary" disabled={!(drafts[id] || '').trim()}>Save key</button>
+              </form>
+            )}
+          </div>
+        )
+      })}
+
       <ul className="small muted" style={{ margin: 0, paddingLeft: 18, display: 'grid', gap: 4 }}>
-        <li>Create a key at <a href="https://platform.claude.com/settings/keys" target="_blank" rel="noreferrer">platform.claude.com → API keys</a>, and set a monthly spend limit in the Console.</li>
-        <li>The key stays in this browser only. It is not in your progress, backups or GitHub gist, so add it again on each device.</li>
-        <li>Your answers are sent to Anthropic only when you click “Get AI feedback” or use the AI interviewer.</li>
+        <li>Keys stay in this browser only. They are not in your progress, backups or GitHub gist, so add them again on each device.</li>
+        <li>Your answers are sent to the provider only when you click “Get AI feedback” or use the AI interviewer.</li>
+        <li>Free tiers have daily limits. If you hit one, switch the provider above and keep practising.</li>
       </ul>
     </section>
   )
