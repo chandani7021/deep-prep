@@ -137,7 +137,8 @@ export default function TaskDetail({ task, pos, go }) {
       return (
         <>
           <p className="small">{title ? <>Explain <strong>{title}</strong> (your most recent solve).</> : 'Explain any problem you solved recently.'}</p>
-          <Steps items={['Start a 2-minute timer and speak out loud, as if to an interviewer.', 'Cover: the brute force, the pattern you used, why it works, time and space complexity.', 'Optional: record yourself once a week and listen back.']} />
+          <Steps items={['Open Practice → “Explain a solution”: it times you, turns your speech into text and gives instant feedback.', 'Cover: the brute force, the pattern you used, why it works, an example, time and space complexity, edge cases.', 'Read the feedback, then explain it once more and compare.']} />
+          <div className="row"><button className="btn sm primary" onClick={() => go('practice')}>Practise with feedback</button></div>
         </>
       )
     }

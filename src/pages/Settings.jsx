@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { Cloud, Download, ExternalLink, RefreshCw, Upload } from 'lucide-react'
 import { gistUrl } from '../sync.js'
+import { AI_MODEL, getAiKey, setAiKey } from '../lib/ai.js'
 import { useStore } from '../store.jsx'
 
 const STATUS = {
@@ -99,6 +100,8 @@ export default function Settings() {
         )}
       </section>
 
+      <AiKeySettings />
+
       <section className="panel">
         <div className="panel-head"><div><h2>Backup file</h2><p className="muted small">A copy you keep yourself. Export one now and then, and import it to restore or to move to another browser.</p></div></div>
         <div className="row">
@@ -113,5 +116,34 @@ export default function Settings() {
         <button className="btn danger" onClick={() => { if (window.confirm('Erase all progress? Export a backup first if you might want it.')) { reset(); toast('Progress erased') } }}>Erase all progress</button>
       </section>
     </div>
+  )
+}
+
+function AiKeySettings() {
+  const { toast } = useStore()
+  const [key, setKey] = useState('')
+  const [saved, setSaved] = useState(() => !!getAiKey())
+  return (
+    <section className="panel" style={{ display: 'grid', gap: 10 }}>
+      <div className="panel-head"><div><h2>AI feedback (optional)</h2>
+        <p className="muted small">Adds AI feedback on your answers and a live AI interviewer on the Practice page. Uses your own Anthropic API key and model {AI_MODEL}; you pay Anthropic directly (typically a few cents per feedback, more for a long interview). Everything else in the app works without it.</p>
+      </div></div>
+      {saved ? (
+        <div className="row">
+          <span className="small">✅ A key is saved in this browser.</span>
+          <button className="btn sm" onClick={() => { if (window.confirm('Remove the API key from this browser?')) { setAiKey(''); setSaved(false); toast('API key removed') } }}>Remove key</button>
+        </div>
+      ) : (
+        <form className="row" onSubmit={(e) => { e.preventDefault(); if (!key.trim()) return; setAiKey(key); setKey(''); setSaved(true); toast('API key saved in this browser') }}>
+          <input className="input" style={{ flex: 1, minWidth: 220 }} type="password" autoComplete="off" placeholder="sk-ant-…" value={key} onChange={(e) => setKey(e.target.value)} aria-label="Anthropic API key" />
+          <button className="btn primary" disabled={!key.trim()}>Save key</button>
+        </form>
+      )}
+      <ul className="small muted" style={{ margin: 0, paddingLeft: 18, display: 'grid', gap: 4 }}>
+        <li>Create a key at <a href="https://platform.claude.com/settings/keys" target="_blank" rel="noreferrer">platform.claude.com → API keys</a>, and set a monthly spend limit in the Console.</li>
+        <li>The key stays in this browser only. It is not in your progress, backups or GitHub gist, so add it again on each device.</li>
+        <li>Your answers are sent to Anthropic only when you click “Get AI feedback” or use the AI interviewer.</li>
+      </ul>
+    </section>
   )
 }

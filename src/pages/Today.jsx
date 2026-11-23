@@ -3,7 +3,7 @@ import { ChevronDown, ExternalLink, ListChecks, Play, Plus, Trash2 } from 'lucid
 import { QUOTES, RESOURCES, SD_PROBLEMS, AI_SECTIONS, TRACKS, tasksForDay } from '../data/content.js'
 import { CURRICULUM, planLoad } from '../data/curriculum.js'
 import { PATTERNS, lcUrl } from '../data/problems.js'
-import { addDays, celebrate, dayKey, dueReviews, planPosition, problemActions, streakInfo, useStore } from '../store.jsx'
+import { addDays, celebrate, dayKey, dueReviews, parseKey, planPosition, prettyDate, problemActions, streakInfo, useStore } from '../store.jsx'
 import { Check, DiffChip, DiveLog } from '../components/ui.jsx'
 import { linkFor } from '../components/EditableLink.jsx'
 import { useFocus } from '../components/Focus.jsx'
@@ -25,8 +25,54 @@ export default function Today({ go }) {
   // Open the first unfinished task by default so today's "what to do" is visible straight away.
   const [openIds, setOpenIds] = useState(() => new Set([tasks.find((t) => !day.tasks[t.id])?.id].filter(Boolean)))
   const toggleOpen = (id) => setOpenIds((o) => { const n = new Set(o); n.has(id) ? n.delete(id) : n.add(id); return n })
-  const totalMins = tasks.reduce((a, t) => a + t.mins, 0)
+  const totalMins = tasks.reduce((a, t) => a + t.mins, 0) + (day.carried || []).reduce((a, c) => a + c.task.mins, 0)
   const fmt = (m) => (m >= 60 ? `${Math.floor(m / 60)} h${m % 60 ? ` ${m % 60} min` : ''}` : `${m} min`)
+  // ---------------------------------------------------------------- leftovers
+  // Unfinished tasks from the last 3 days. DSA problems roll forward on their own (unsolved ones are
+  // always first in today's list), and daily habits (explain out loud, reading) are not carried.
+  const NO_CARRY = new Set(['dsa', 'talk', 'current'])
+  const leftovers = []
+  for (let i = 1; i <= 3; i++) {
+    const k = addDays(today, -i)
+    if (k < state.profile.startDate) break
+    const d = state.days[k] || {}
+    for (const t of tasksForDay(parseKey(k), pos.plan.tracks, state.profile.weeklyHours || 22)) {
+      if (NO_CARRY.has(t.id) || d.tasks?.[t.id] || d.moved?.[t.id] || d.skipped?.[t.id]) continue
+      leftovers.push({ from: k, task: t })
+    }
+    for (const c of d.custom || []) if (!c.done) leftovers.push({ from: k, custom: c })
+  }
+  const carried = day.carried || []
+  const moveToToday = (items) => {
+    act((s) => {
+      const td = (s.days[today] ||= { tasks: {}, custom: [] })
+      for (const it of items) {
+        const d = (s.days[it.from] ||= { tasks: {}, custom: [] })
+        if (it.custom) {
+          d.custom = (d.custom || []).filter((x) => x.id !== it.custom.id)
+          td.custom.push({ ...it.custom, from: it.from })
+        } else {
+          (d.moved ||= {})[it.task.id] = today
+          ;(td.carried ||= []).push({ key: `${it.from}:${it.task.id}`, from: it.from, task: it.task })
+        }
+      }
+    })
+  }
+  const skipLeftovers = (items) => {
+    act((s) => {
+      for (const it of items) {
+        const d = (s.days[it.from] ||= { tasks: {}, custom: [] })
+        if (it.custom) d.custom = (d.custom || []).filter((x) => x.id !== it.custom.id)
+        else (d.skipped ||= {})[it.task.id] = true
+      }
+    })
+  }
+  const toggleCarried = (c) => {
+    const was = !!day.tasks[c.key]
+    act((s) => { (s.days[today] ||= { tasks: {}, custom: [] }).tasks[c.key] = !was }, { xp: was ? -c.task.xp : c.task.xp, reason: was ? '' : `${c.task.label} (carried over)` })
+    if (!was) celebrate()
+  }
+
   const jumpToTasks = () => document.getElementById('todays-dive')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 
   const toggleTask = (t) => {
@@ -76,7 +122,7 @@ export default function Today({ go }) {
           </p>
           <p className="hero-quote">{quote}</p>
           <button className="btn primary today-jump" onClick={jumpToTasks}>
-            <ListChecks size={16} /> Today: {tasks.length} tasks · about {fmt(totalMins)} · {doneCount} done
+            <ListChecks size={16} /> Today: {tasks.length + (day.carried || []).length} tasks · about {fmt(totalMins)} · {doneCount + (day.carried || []).filter((c) => day.tasks[c.key]).length} done
           </button>
         </div>
         <div className="hero-streak">
@@ -122,50 +168,40 @@ export default function Today({ go }) {
             <div className="day-bar" aria-hidden="true"><span style={{ width: `${(doneCount / tasks.length) * 100}%` }} /></div>
 
             <p className="small muted" style={{ marginBottom: 10 }}>Tap a task to see exactly what to do. Tick the circle when it’s done.</p>
-            {tasks.map((t) => {
-              const done = !!day.tasks[t.id]
-              const isOpen = openIds.has(t.id)
-              return (
-                <div key={t.id} className={`task ${done ? 'done' : ''} ${isOpen ? 'open' : ''}`}>
-                  <button type="button" className="task-check" onClick={() => toggleTask(t)} aria-pressed={done}
-                    aria-label={`${done ? 'Mark not done' : 'Mark done'}: ${t.label}`}>
-                    <Check on={done} />
-                  </button>
-                  <div className="task-body">
-                    <button type="button" className="task-summary" onClick={() => toggleOpen(t.id)} aria-expanded={isOpen} aria-controls={`task-${t.id}`}>
-                      <span className="task-label">{t.id === 'dsa' ? `Solve ${state.profile.dailyProblems} DSA problems` : t.label}</span>
-                      <ChevronDown size={18} className="task-chevron" aria-hidden="true" />
-                    </button>
-                    <div className="muted small">{t.detail}</div>
-                    <div className="task-meta">
-                      <span className="chip xp">+{t.xp} m</span>
-                      <span className="chip track" style={{ color: TRACKS[t.track].color }}>{TRACKS[t.track].name}</span>
-                      <span className="chip">{t.mins} min</span>
-                      {!done && t.mins >= 25 && (
-                        <button className="btn sm ghost" onClick={() => focus.start(Math.min(t.mins, 60), t.label)}>
-                          <Play size={13} /> Focus {Math.min(t.mins, 60)} min
-                        </button>
-                      )}
-                    </div>
-                    {isOpen && (
-                      <div className="task-detail" id={`task-${t.id}`}>
-                        <TaskDetail task={t} pos={pos} go={go} />
-                        <div className="row" style={{ marginTop: 4 }}>
-                          <button className={`btn sm ${done ? '' : 'primary'}`} onClick={() => toggleTask(t)}>{done ? 'Mark not done' : 'Mark task done'}</button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
+            {leftovers.length > 0 && (
+              <div className="leftovers">
+                <div className="row" style={{ gap: 8 }}>
+                  <strong style={{ flex: 1 }}>Unfinished from earlier ({leftovers.length})</strong>
+                  <button className="btn sm primary" onClick={() => moveToToday(leftovers)}>Move all to today</button>
+                  <button className="btn sm ghost" onClick={() => skipLeftovers(leftovers)}>Skip all</button>
                 </div>
-              )
-            })}
+                {leftovers.map((it) => (
+                  <div key={`${it.from}:${it.task?.id || it.custom.id}`} className="row detail-row">
+                    <span className="small dim" style={{ width: 92 }}>{prettyDate(it.from, { weekday: 'short', day: 'numeric', month: 'short' })}</span>
+                    <span className="small" style={{ flex: 1, minWidth: 150 }}>{it.task ? it.task.label : it.custom.text}{it.task && <span className="dim"> · {it.task.mins} min</span>}</span>
+                    <button className="btn sm" onClick={() => moveToToday([it])}>Move to today</button>
+                    <button className="btn sm ghost" onClick={() => skipLeftovers([it])}>Skip</button>
+                  </div>
+                ))}
+                <p className="small dim" style={{ marginTop: 6 }}>Unsolved DSA problems carry over automatically: they are always first in today’s list. If leftovers pile up, move only one or two and skip the rest; Sunday’s catch-up hour is for the backlog.</p>
+              </div>
+            )}
+
+            {tasks.map((t) => (
+              <TaskCard key={t.id} t={t} id={t.id} done={!!day.tasks[t.id]} open={openIds.has(t.id)} onOpen={() => toggleOpen(t.id)} onToggle={() => toggleTask(t)}
+                label={t.id === 'dsa' ? `Solve ${state.profile.dailyProblems} DSA problems` : t.label} focus={focus} pos={pos} go={go} />
+            ))}
+            {carried.map((c) => (
+              <TaskCard key={c.key} t={c.task} id={c.key} done={!!day.tasks[c.key]} open={openIds.has(c.key)} onOpen={() => toggleOpen(c.key)} onToggle={() => toggleCarried(c)}
+                label={c.task.label} from={c.from} focus={focus} pos={pos} go={go} />
+            ))}
 
             {day.custom.map((c) => (
               <div key={c.id} className={`task ${c.done ? 'done' : ''}`}>
                 <button type="button" className="task-check" onClick={() => toggleCustom(c)} aria-pressed={c.done} aria-label={`${c.done ? 'Mark not done' : 'Mark done'}: ${c.text}`}>
                   <Check on={c.done} />
                 </button>
-                <div className="task-body"><div className="task-label">{c.text}</div><div className="task-meta"><span className="chip xp">+10 m</span></div></div>
+                <div className="task-body"><div className="task-label">{c.text}</div><div className="task-meta"><span className="chip xp">+10 m</span>{c.from && <span className="chip">From {prettyDate(c.from, { weekday: 'short', day: 'numeric', month: 'short' })}</span>}</div></div>
                 <button className="btn icon ghost" aria-label="Delete task" onClick={(e) => {
                   e.stopPropagation()
                   act((s) => { s.days[today].custom = s.days[today].custom.filter((x) => x.id !== c.id) }, { xp: c.done ? -10 : 0 })
@@ -309,5 +345,41 @@ function ReviewQueue() {
       ))}
       {due.length > 6 && <p className="small muted" style={{ marginTop: 8 }}>+{due.length - 6} more on the DSA page.</p>}
     </section>
+  )
+}
+
+function TaskCard({ t, id, done, open, onOpen, onToggle, label, from, focus, pos, go }) {
+  return (
+    <div className={`task ${done ? 'done' : ''} ${open ? 'open' : ''}`}>
+      <button type="button" className="task-check" onClick={onToggle} aria-pressed={done} aria-label={`${done ? 'Mark not done' : 'Mark done'}: ${label}`}>
+        <Check on={done} />
+      </button>
+      <div className="task-body">
+        <button type="button" className="task-summary" onClick={onOpen} aria-expanded={open} aria-controls={`task-${id}`}>
+          <span className="task-label">{label}</span>
+          <ChevronDown size={18} className="task-chevron" aria-hidden="true" />
+        </button>
+        <div className="muted small">{t.detail}</div>
+        <div className="task-meta">
+          <span className="chip xp">+{t.xp} m</span>
+          <span className="chip track" style={{ color: TRACKS[t.track].color }}>{TRACKS[t.track].name}</span>
+          <span className="chip">{t.mins} min</span>
+          {from && <span className="chip">From {prettyDate(from, { weekday: 'short', day: 'numeric', month: 'short' })}</span>}
+          {!done && t.mins >= 25 && (
+            <button className="btn sm ghost" onClick={() => focus.start(Math.min(t.mins, 60), t.label)}>
+              <Play size={13} /> Focus {Math.min(t.mins, 60)} min
+            </button>
+          )}
+        </div>
+        {open && (
+          <div className="task-detail" id={`task-${id}`}>
+            <TaskDetail task={t} pos={pos} go={go} />
+            <div className="row" style={{ marginTop: 4 }}>
+              <button className={`btn sm ${done ? '' : 'primary'}`} onClick={onToggle}>{done ? 'Mark not done' : 'Mark task done'}</button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
   )
 }

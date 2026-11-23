@@ -471,3 +471,29 @@ details.notes summary { cursor: pointer; color: var(--muted); font-size: 13px; }
 .detail-module { display: grid; gap: 6px; }
 .detail-module details summary { cursor: pointer; color: var(--muted); }
 .today-jump { margin-top: 14px; }
+
+/* ---------------------------------------------------------------- leftovers & practice */
+.leftovers { padding: 12px 14px; margin-bottom: 12px; border: 1px dashed var(--line-strong); border-radius: 12px; background: var(--abyss); }
+.practice-grid { display: grid; grid-template-columns: minmax(220px, 280px) 1fr; gap: 18px; }
+@media (max-width: 760px) { .practice-grid { grid-template-columns: 1fr; } }
+.practice-timer { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-display); font-size: 28px; font-weight: 800; }
+.practice-timer.over { color: var(--warn); }
+.phases { margin: 10px 0 0; padding-left: 20px; display: grid; gap: 4px; font-size: 14px; color: var(--muted); }
+.phases li.now { color: var(--text); font-weight: 700; }
+.followup { margin: 8px 0 0; padding: 8px 10px; border-radius: 10px; background: var(--deep-2); font-size: 14px; }
+.transcript { padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--abyss); min-height: 60px; white-space: pre-wrap; }
+.rec { color: var(--hard); font-weight: 700; }
+.feedback { display: grid; gap: 10px; margin-top: 16px; padding: 14px; border-radius: 12px; border: 1px solid var(--line-strong); background: var(--abyss); }
+.feedback.ai { border-color: rgba(154, 168, 255, 0.5); }
+.feedback h4 { margin: 0 0 4px; font-size: 14px; }
+.fb-checks { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 8px; }
+.fb-check { display: flex; gap: 8px; align-items: flex-start; padding: 8px; border-radius: 10px; background: var(--deep-2); }
+.fb-check.hit { background: rgba(95, 224, 195, 0.08); }
+.fb-notes { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: 14px; color: var(--muted); }
+.fb-notes li.good { color: var(--text); }
+.fb-scores { display: grid; gap: 6px; }
+.chat { display: grid; gap: 8px; max-height: 420px; overflow-y: auto; padding: 4px; }
+.bubble { padding: 10px 12px; border-radius: 12px; max-width: 85%; }
+.bubble p { margin: 2px 0 0; white-space: pre-wrap; }
+.bubble.assistant { background: var(--deep-2); justify-self: start; }
+.bubble.user { background: rgba(61, 139, 253, 0.18); justify-self: end; }

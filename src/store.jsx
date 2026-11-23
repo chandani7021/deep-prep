@@ -50,6 +50,7 @@ const defaultState = () => ({
   productTopics: {},
   areaTopics: {}, // topic id -> true, for Language, LLD, SQL, Frontend, Mobile, Getting hired
   readiness: {}, // benchmark id -> { status, date, note }
+  practice: [], // interview practice sessions
   linkOverrides: {}, // original url (or res:<id>) -> your replacement link
   stories: {},
   mocks: [],

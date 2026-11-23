@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Award, BookOpen, Brain, Briefcase, Code2, Cpu, Database, Gauge, Languages, LayoutTemplate, Map, Mic, Network, Rocket, Settings as Cog, Shapes, Smartphone, Sun, Target, Waves } from 'lucide-react'
+import { Award, BookOpen, Brain, Briefcase, Code2, Cpu, Database, Gauge, Languages, LayoutTemplate, Map, MessagesSquare, Mic, Network, Rocket, Settings as Cog, Shapes, Smartphone, Sun, Target, Waves } from 'lucide-react'
 import { dueReviews, levelFor, streakInfo, useStore } from './store.jsx'
 import { DepthGauge, Toasts } from './components/ui.jsx'
 import { FocusProvider, FocusWidget } from './components/Focus.jsx'
@@ -13,6 +13,7 @@ import DevOps from './pages/DevOps.jsx'
 import Product from './pages/Product.jsx'
 import Area from './pages/Area.jsx'
 import Readiness from './pages/Readiness.jsx'
+import Practice from './pages/Practice.jsx'
 import Library from './pages/Library.jsx'
 import Mocks from './pages/Mocks.jsx'
 import Achievements from './pages/Achievements.jsx'
@@ -24,6 +25,7 @@ const area = (track) => function AreaPage(props) { return <Area track={track} {.
 const PAGES = [
   { id: 'today', name: 'Today', icon: Sun, el: Today },
   { id: 'roadmap', name: 'Roadmap', icon: Map, el: Roadmap },
+  { id: 'practice', name: 'Practice', icon: MessagesSquare, el: Practice },
   { id: 'readiness', name: 'Readiness', icon: Gauge, el: Readiness },
   { id: 'dsa', name: 'DSA', icon: Code2, el: DSA, track: 'dsa' },
   { id: 'system-design', name: 'System design', icon: Network, el: SystemDesign, track: 'sd' },
