@@ -34,7 +34,7 @@ export default function Fundamentals({ go }) {
 
       <section className="panel">
         <div className="panel-head">
-          <div><h2>Books that make your fundamentals strong</h2><p className="muted small">Start with the “Must” ones. Read a chapter a week alongside the plan; track progress in the Library.</p></div>
+          <div><h2>Books that make your fundamentals strong</h2><p className="muted small">Start with the “Must” ones. Read a chapter a week alongside the plan; track progress in the Library. With AI writing more of the code, fundamentals matter more, not less: you have to judge what it produces (<a href="https://www.thoughtworks.com/en-us/about-us/news/2026/combat-ai-cognitive-debt-radar-v34" target="_blank" rel="noreferrer">Thoughtworks Radar, April 2026</a>).</p></div>
           <button className="btn sm ghost" onClick={() => go('library')}>Library</button>
         </div>
         {RESOURCES.filter((r) => r.track === 'craft' || (r.track === 'fund' && r.type === 'Book')).map((r) => (

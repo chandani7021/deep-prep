@@ -18,7 +18,7 @@ export default function Library() {
     <div className="page">
       <div>
         <h1>Library</h1>
-        <p className="muted" style={{ maxWidth: '70ch' }}>Books, courses and videos, with a place to note exactly where you stopped. “Must” items are the core path; the rest are for depth if you have time.</p>
+        <p className="muted" style={{ maxWidth: '70ch' }}>Books, courses and videos, with a place to note exactly where you stopped. “Must” items are the core path; the rest are for depth if you have time. Editions and links checked November 2026.</p>
       </div>
 
       <div className="row">
