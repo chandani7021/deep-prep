@@ -423,3 +423,14 @@ details.notes summary { cursor: pointer; color: var(--muted); font-size: 13px; }
   .module-body { padding-left: 0; }
   .week-track .module-body { padding-left: 0; }
 }
+
+/* ---------------------------------------------------------------- editable links */
+.elink { display: inline-flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.link-fix {
+  display: inline-flex; align-items: center; gap: 4px; border: 0; background: transparent; color: var(--dim);
+  padding: 2px 4px; border-radius: 6px; cursor: pointer; font-size: 12px; opacity: 0.55;
+}
+.link-fix:hover, .link-fix:focus-visible { opacity: 1; color: var(--text); background: var(--deep-2); }
+.elink:hover .link-fix { opacity: 1; }
+.link-edit { display: grid; gap: 6px; width: 100%; max-width: 520px; padding: 8px; border: 1px solid var(--line-strong); border-radius: 10px; background: var(--abyss); }
+.link-edit .small.dim { overflow-wrap: anywhere; }

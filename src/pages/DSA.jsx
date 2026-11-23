@@ -1,8 +1,9 @@
 import { useMemo, useState } from 'react'
-import { ChevronDown, ChevronRight, ExternalLink, NotebookPen, Plus, RotateCcw, Trash2 } from 'lucide-react'
+import { ChevronDown, ChevronRight, NotebookPen, Plus, RotateCcw, Trash2 } from 'lucide-react'
 import { PATTERNS } from '../data/problems.js'
 import { allProblems, celebrate, dayKey, dueReviews, planPosition, prettyDate, problemActions, useStore } from '../store.jsx'
 import { DiffChip, Progress, Ring } from '../components/ui.jsx'
+import EditableLink from '../components/EditableLink.jsx'
 import ModuleList from '../components/Modules.jsx'
 
 export default function DSA() {
@@ -144,7 +145,7 @@ function ProblemRow({ p, sub, review }) {
       <div className={`list-row ${s.status !== 'todo' ? 'solved' : ''}`} style={{ borderTop: 0, flexWrap: 'wrap' }}>
         <span className={`status-dot ${s.status}`} title={s.status} />
         <div className="title">
-          <a href={p.url} target="_blank" rel="noreferrer">{p.title} <ExternalLink size={12} /></a>
+          <EditableLink href={p.url}>{p.title}</EditableLink>
           {(sub || s.solved) && <div className="small dim">{sub}{sub && s.solved ? ' · ' : ''}{s.solved ? `solved ${prettyDate(s.solved)}` : ''}</div>}
         </div>
         {p.nc && <span className="chip" title="On the NeetCode 150 list">NC</span>}

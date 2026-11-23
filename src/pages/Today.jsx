@@ -5,6 +5,7 @@ import { CURRICULUM } from '../data/curriculum.js'
 import { PATTERNS, lcUrl } from '../data/problems.js'
 import { addDays, celebrate, dayKey, dueReviews, planPosition, problemActions, streakInfo, useStore } from '../store.jsx'
 import { Check, DiffChip, DiveLog } from '../components/ui.jsx'
+import { linkFor } from '../components/EditableLink.jsx'
 import { useFocus } from '../components/Focus.jsx'
 
 export default function Today({ go }) {
@@ -217,7 +218,7 @@ function NextUp({ pos, go }) {
       {has('dsa') && next.map((p) => (
         <div key={p.slug} className="row" style={{ padding: '8px 0', borderTop: '1px solid var(--line)' }}>
           <div style={{ flex: 1, minWidth: 180 }}>
-            <a href={p.url} target="_blank" rel="noreferrer" style={{ fontWeight: 600 }}>{p.title} <ExternalLink size={12} /></a>
+            <a href={linkFor(state, p.url, p.url)} target="_blank" rel="noreferrer" style={{ fontWeight: 600 }}>{p.title} <ExternalLink size={12} /></a>
             <div className="small dim">{p.pattern}</div>
           </div>
           <DiffChip diff={p.diff} />
@@ -274,7 +275,7 @@ function ReviewQueue() {
       </div>
       {due.slice(0, 6).map((p) => (
         <div key={p.slug} className="row" style={{ padding: '8px 0', borderTop: '1px solid var(--line)' }}>
-          <a href={p.url} target="_blank" rel="noreferrer" style={{ flex: 1, minWidth: 180, fontWeight: 600 }}>{p.title}</a>
+          <a href={linkFor(state, p.url, p.url)} target="_blank" rel="noreferrer" style={{ flex: 1, minWidth: 180, fontWeight: 600 }}>{p.title}</a>
           <DiffChip diff={p.diff} />
           <button className="btn sm primary" onClick={() => { pa.review(p, true); celebrate() }}>Got it</button>
           <button className="btn sm" onClick={() => pa.review(p, false)}>Struggled</button>

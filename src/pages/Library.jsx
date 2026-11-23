@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { ExternalLink, Minus, Plus, Trash2 } from 'lucide-react'
+import { Minus, Plus, Trash2 } from 'lucide-react'
+import EditableLink from '../components/EditableLink.jsx'
 import { RESOURCES, TRACKS } from '../data/content.js'
 import { celebrate, useStore } from '../store.jsx'
 import { Progress } from '../components/ui.jsx'
@@ -18,7 +19,7 @@ export default function Library() {
     <div className="page">
       <div>
         <h1>Library</h1>
-        <p className="muted" style={{ maxWidth: '70ch' }}>Books, courses and videos, with a place to note exactly where you stopped. “Must” items are the core path; the rest are for depth if you have time. Editions and links checked November 2026.</p>
+        <p className="muted" style={{ maxWidth: '70ch' }}>Books, courses and videos, with a place to note exactly where you stopped. “Must” items are the core path; the rest are for depth if you have time. Editions and links checked November 2026. If a link stops working, click the ✎ next to it to paste a new one.</p>
       </div>
 
       <div className="row">
@@ -74,7 +75,7 @@ function Resource({ r }) {
     <div className="res">
       <div>
         <div className="row" style={{ gap: 8 }}>
-          <span className="res-title">{r.url ? <a href={r.url} target="_blank" rel="noreferrer">{r.title} <ExternalLink size={12} /></a> : r.title}</span>
+          <span className="res-title"><EditableLink href={r.url} fixKey={r.url || `res:${r.id}`}>{r.title}</EditableLink></span>
           {r.must && <span className="chip must">Must</span>}
           {p.done && <span className="chip easy">Finished</span>}
         </div>

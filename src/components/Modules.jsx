@@ -1,4 +1,4 @@
-import { ExternalLink } from 'lucide-react'
+import EditableLink from './EditableLink.jsx'
 import { CURRICULUM } from '../data/curriculum.js'
 import { TRACKS } from '../data/content.js'
 import { planPosition, useStore } from '../store.jsx'
@@ -20,7 +20,7 @@ export function ModuleBody({ m }) {
       {m.links?.length > 0 && (
         <div className="module-links">
           {m.links.map(([title, url]) => (
-            <a key={url} href={url} target="_blank" rel="noreferrer" className="small">{title} <ExternalLink size={11} /></a>
+            <EditableLink key={url} href={url} className="small" iconSize={11}>{title}</EditableLink>
           ))}
         </div>
       )}

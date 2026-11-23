@@ -1,9 +1,9 @@
-import { ExternalLink } from 'lucide-react'
 import { AI_SECTIONS, PROJECT_MILESTONES, RESOURCES } from '../data/content.js'
 import { celebrate, planPosition, useStore } from '../store.jsx'
 import { Check, Progress, Ring } from '../components/ui.jsx'
 import TopicGrid from '../components/TopicGrid.jsx'
 import ModuleList from '../components/Modules.jsx'
+import EditableLink from '../components/EditableLink.jsx'
 
 export default function AIML({ go }) {
   const { state, act } = useStore()
@@ -71,7 +71,7 @@ export default function AIML({ go }) {
         {RESOURCES.filter((r) => r.track === 'ai').map((r) => (
           <div key={r.id} className="row" style={{ padding: '8px 0', borderTop: '1px solid var(--line)' }}>
             <div style={{ flex: 1, minWidth: 200 }}>
-              {r.url ? <a href={r.url} target="_blank" rel="noreferrer" style={{ fontWeight: 600 }}>{r.title} <ExternalLink size={12} /></a> : <span style={{ fontWeight: 600 }}>{r.title}</span>}
+              <EditableLink href={r.url} fixKey={r.url || `res:${r.id}`} style={{ fontWeight: 600 }}>{r.title}</EditableLink>
               <div className="small dim">{r.author} · {r.why}</div>
             </div>
             {r.must && <span className="chip must">Must</span>}

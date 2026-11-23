@@ -47,6 +47,7 @@ const defaultState = () => ({
   opsTopics: {},
   opsProject: {},
   productTopics: {},
+  linkOverrides: {}, // original url (or res:<id>) -> your replacement link
   stories: {},
   mocks: [],
   weeks: {}, // n -> { goals: {track:true}, reflection: '' }

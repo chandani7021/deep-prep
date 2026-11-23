@@ -24,7 +24,7 @@ export default function Mocks() {
         <h1>Mock interviews</h1>
         <p className="muted" style={{ maxWidth: '70ch' }}>
           Start around a third of the way into your plan: one a week at first, two a week near the end. Try <a href="https://interviewing.io/" target="_blank" rel="noreferrer">interviewing.io</a>,{' '}
-          <a href="https://www.tryexponent.com/practice" target="_blank" rel="noreferrer">Exponent peer mocks</a>, or trade sessions with a friend.
+          <a href="https://www.aced.io/practice" target="_blank" rel="noreferrer">Aced peer mocks (formerly Exponent)</a>, or trade sessions with a friend.
         </p>
       </div>
 

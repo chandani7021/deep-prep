@@ -1,9 +1,9 @@
-import { ExternalLink } from 'lucide-react'
 import { OPS_MILESTONES, RESOURCES } from '../data/content.js'
 import { CURRICULUM } from '../data/curriculum.js'
 import { celebrate, planPosition, useStore } from '../store.jsx'
 import { Check, Progress, Ring } from '../components/ui.jsx'
 import TopicGrid from '../components/TopicGrid.jsx'
+import EditableLink from '../components/EditableLink.jsx'
 import { weeksLabel } from '../components/Modules.jsx'
 
 export default function DevOps({ go }) {
@@ -52,7 +52,7 @@ export default function DevOps({ go }) {
             <TopicGrid topics={m.topics} storeKey="opsTopics" xp={10} />
             <p className="small" style={{ marginTop: 12 }}><strong>Lab:</strong> {m.practice}</p>
             <div className="module-links" style={{ marginTop: 8 }}>
-              {m.links.map(([title, url]) => <a key={url} href={url} target="_blank" rel="noreferrer" className="small">{title} <ExternalLink size={11} /></a>)}
+              {m.links.map(([title, url]) => <EditableLink key={url} href={url} className="small" iconSize={11}>{title}</EditableLink>)}
             </div>
           </section>
         )
@@ -85,7 +85,7 @@ export default function DevOps({ go }) {
         {RESOURCES.filter((r) => r.track === 'ops').map((r) => (
           <div key={r.id} className="row" style={{ padding: '8px 0', borderTop: '1px solid var(--line)' }}>
             <div style={{ flex: 1, minWidth: 200 }}>
-              <a href={r.url} target="_blank" rel="noreferrer" style={{ fontWeight: 600 }}>{r.title} <ExternalLink size={12} /></a>
+              <EditableLink href={r.url} fixKey={r.url || `res:${r.id}`} style={{ fontWeight: 600 }}>{r.title}</EditableLink>
               <div className="small dim">{r.author} · {r.why}</div>
             </div>
             {r.must && <span className="chip must">Must</span>}
