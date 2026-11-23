@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { TRACKS } from '../data/content.js'
-import { AREAS, MAX_DAYS, MIN_DAYS, PLAN_PRESETS, clampDays } from '../data/curriculum.js'
+import { AREAS, MAX_DAYS, MIN_DAYS, PLAN_PRESETS, ROLES, WEEKLY_HOURS_OPTIONS, clampDays, planLoad } from '../data/curriculum.js'
+import { LANGUAGES } from '../data/areas-extra.js'
+import PlanLoad from '../components/PlanLoad.jsx'
 import { addDays, celebrate, planPosition, prettyDate, useStore } from '../store.jsx'
 import { Check, Ring } from '../components/ui.jsx'
 import { ModuleBody } from '../components/Modules.jsx'
@@ -121,14 +123,52 @@ function PlanSetup() {
     if (on && p.tracks.length === 1) { toast('Keep at least one area in your plan'); return }
     act((s) => { s.profile.tracks = on ? s.profile.tracks.filter((t) => t !== id) : [...s.profile.tracks, id] })
   }
+  const pickRole = (r) => {
+    const days = planLoad({ ...p, tracks: r.tracks }).recommendedDays
+    act((s) => { s.profile.role = r.id; s.profile.tracks = [...r.tracks]; s.profile.language = r.language; s.profile.planDays = days })
+    setCustom(String(days))
+    toast(`${r.name} plan: ${days} days at ${p.weeklyHours || 22} h/week`)
+  }
+  const role = ROLES.find((r) => r.id === p.role)
 
   return (
     <details className="panel" open={!p.planSet}>
       <summary style={{ cursor: 'pointer' }}>
         <h2 style={{ display: 'inline' }}>Plan setup</h2>
-        <span className="muted small"> · {p.planDays} days · {p.tracks.length} area{p.tracks.length === 1 ? '' : 's'}</span>
+        <span className="muted small"> · {role ? `${role.name} · ` : ''}{p.planDays} days · {p.tracks.length} area{p.tracks.length === 1 ? '' : 's'} · {p.weeklyHours || 22} h/week</span>
       </summary>
       <div className="plan-setup" style={{ marginTop: 14 }}>
+        <div>
+          <span className="label">Which role are you preparing for?</span>
+          <div className="area-grid">
+            {ROLES.map((r) => (
+              <button key={r.id} type="button" className={`role-card ${p.role === r.id ? 'on' : ''}`} aria-pressed={p.role === r.id} onClick={() => pickRole(r)}>
+                <strong>{r.name}</strong>
+                <span className="small muted">{r.tracks.map((t) => TRACKS[t].name).join(' · ')}</span>
+                <span className="small dim">{r.note}</span>
+              </button>
+            ))}
+          </div>
+          <p className="small dim" style={{ marginTop: 6 }}>Picking a role sets the areas, your language and a plan length that fits. You can still change anything below.{role?.optional?.length ? ` Optional for ${role.name}: ${role.optional.map((t) => TRACKS[t].name).join(', ')}.` : ''}</p>
+        </div>
+
+        <div className="row" style={{ gap: 16, alignItems: 'flex-end' }}>
+          <label>
+            <span className="label">Hours per week you can study</span>
+            <select className="select" style={{ width: 'auto' }} value={p.weeklyHours || 22} onChange={(e) => act((s) => { s.profile.weeklyHours = Number(e.target.value) })}>
+              {WEEKLY_HOURS_OPTIONS.map((h) => <option key={h} value={h}>{h} h/week{h === 22 ? ' (≈3 h weekdays + weekends)' : h <= 12 ? ' (alongside a busy job)' : h >= 30 ? ' (full-time prep)' : ''}</option>)}
+            </select>
+          </label>
+          {p.tracks.includes('lang') && (
+            <label>
+              <span className="label">Interview language</span>
+              <select className="select" style={{ width: 'auto' }} value={p.language || 'python'} onChange={(e) => act((s) => { s.profile.language = e.target.value })}>
+                {Object.entries(LANGUAGES).map(([id, l]) => <option key={id} value={id}>{l.name}</option>)}
+              </select>
+            </label>
+          )}
+        </div>
+
         <div>
           <span className="label">How many days do you want to prepare?</span>
           <div className="preset-row">
@@ -168,6 +208,20 @@ function PlanSetup() {
             })}
           </div>
         </div>
+
+        {p.tracks.includes('dsa') && (
+          <div className={`check-item ${p.dsaStretch ? 'on' : ''}`} role="checkbox" aria-checked={!!p.dsaStretch} tabIndex={0} style={{ maxWidth: 560 }}
+            onClick={() => act((s) => { s.profile.dsaStretch = !s.profile.dsaStretch })}
+            onKeyDown={(e) => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); act((s) => { s.profile.dsaStretch = !s.profile.dsaStretch }) } }}>
+            <Check on={!!p.dsaStretch} small />
+            <div>
+              <div style={{ fontWeight: 600 }}>Stretch DSA for the most selective companies</div>
+              <div className="small muted">Adds a final DSA module: 50–100 extra problems, contests and company-tagged practice (~15 h).</div>
+            </div>
+          </div>
+        )}
+
+        <PlanLoad />
 
         <p className="small dim">Changing the plan reshuffles which week each module lands in. Solved problems, checked topics, notes and XP all stay.</p>
         {!p.planSet && (

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { ExternalLink, Play, Plus, Trash2 } from 'lucide-react'
 import { QUOTES, RESOURCES, SD_PROBLEMS, AI_SECTIONS, TRACKS, tasksForDay } from '../data/content.js'
-import { CURRICULUM } from '../data/curriculum.js'
+import { CURRICULUM, planLoad } from '../data/curriculum.js'
 import { PATTERNS, lcUrl } from '../data/problems.js'
 import { addDays, celebrate, dayKey, dueReviews, planPosition, problemActions, streakInfo, useStore } from '../store.jsx'
 import { Check, DiffChip, DiveLog } from '../components/ui.jsx'
@@ -14,7 +14,8 @@ export default function Today({ go }) {
   const today = dayKey()
   const pos = planPosition(state.profile)
   const week = pos.plan.weeks[pos.week - 1]
-  const tasks = tasksForDay(new Date(), pos.plan.tracks)
+  const tasks = tasksForDay(new Date(), pos.plan.tracks, state.profile.weeklyHours || 22)
+  const load = planLoad(state.profile)
   const day = state.days[today] || { tasks: {}, custom: [] }
   const doneCount = tasks.filter((t) => day.tasks[t.id]).length
   const streak = streakInfo(state)
@@ -79,6 +80,14 @@ export default function Today({ go }) {
           <span style={{ fontSize: 22 }} aria-hidden="true">🗺️</span>
           <span style={{ flex: 1 }}>Choose how many days you want to prepare and which areas to include. Your weekly modules and daily tasks follow that plan.</span>
           <button className="btn primary" onClick={() => go('roadmap')}>Set up my plan</button>
+        </div>
+      )}
+
+      {state.profile.planSet && load.status === 'overloaded' && (
+        <div className="banner">
+          <span style={{ fontSize: 22 }} aria-hidden="true">⚖️</span>
+          <span style={{ flex: 1 }}>Your plan has more content than time: it needs about {load.neededDays} days at {load.weekly} h/week, but it is {load.days} days long.</span>
+          <button className="btn" onClick={() => go('roadmap')}>Adjust plan</button>
         </div>
       )}
 
@@ -203,8 +212,14 @@ function NextUp({ pos, go }) {
 
   const sd = has('sd') && (SD_PROBLEMS.find((p) => wk(p.id) <= week && !(state.sdProblems[p.id]?.count > 0)) || SD_PROBLEMS.find((p) => !(state.sdProblems[p.id]?.count > 0)))
   const aiTopic = has('ai') && AI_SECTIONS.flatMap((s) => s.topics.map(([id, name]) => ({ id, name, section: s.name }))).find((t) => !state.aiTopics[t.id])
-  const opsTopic = has('ops') && CURRICULUM.ops.filter((m) => wk(m.id) <= week).flatMap((m) => m.topics.map(([id, name]) => ({ id, name, section: m.title }))).find((t) => !state.opsTopics?.[t.id])
-  const productTopic = has('product') && CURRICULUM.product.filter((m) => wk(m.id) <= week).flatMap((m) => m.topics.map(([id, name]) => ({ id, name, section: m.title }))).find((t) => !state.productTopics?.[t.id])
+  // Next unchecked topic in each checklist-style area, from modules already scheduled.
+  const STORE = { ops: 'opsTopics', product: 'productTopics' }
+  const PAGE = { ops: 'devops', product: 'product', lang: 'language', lld: 'lld', sql: 'sql', fe: 'frontend', mobile: 'mobile', career: 'career' }
+  const nextTopics = Object.keys(PAGE).filter(has).map((t) => {
+    const store = state[STORE[t] || 'areaTopics'] || {}
+    const topic = CURRICULUM[t].filter((m) => wk(m.id) <= week).flatMap((m) => m.topics.map(([id, name]) => ({ id, name, section: m.title }))).find((x) => !store[x.id])
+    return topic && { ...topic, track: t, page: PAGE[t] }
+  }).filter(Boolean).slice(0, 4)
   const mine = (r) => r.must && (has(r.track) || r.track === 'craft')
   const reading = RESOURCES.find((r) => mine(r) && state.resources[r.id]?.current > 0 && !state.resources[r.id]?.done)
     || RESOURCES.find((r) => mine(r) && !state.resources[r.id]?.current)
@@ -238,16 +253,11 @@ function NextUp({ pos, go }) {
             <div className="task-body"><span className="small" style={{ color: 'var(--c-ai)', fontWeight: 600 }}>AI/ML · {aiTopic.section}</span><div className="task-label">{aiTopic.name}</div></div>
           </button>
         )}
-        {opsTopic && (
-          <button className="task" style={{ textAlign: 'left', width: '100%' }} onClick={() => go('devops')}>
-            <div className="task-body"><span className="small" style={{ color: 'var(--c-ops)', fontWeight: 600 }}>DevOps · {opsTopic.section}</span><div className="task-label">{opsTopic.name}</div></div>
+        {nextTopics.map((t) => (
+          <button key={t.track} className="task" style={{ textAlign: 'left', width: '100%' }} onClick={() => go(t.page)}>
+            <div className="task-body"><span className="small" style={{ color: TRACKS[t.track].color, fontWeight: 600 }}>{TRACKS[t.track].name} · {t.section}</span><div className="task-label">{t.name}</div></div>
           </button>
-        )}
-        {productTopic && (
-          <button className="task" style={{ textAlign: 'left', width: '100%' }} onClick={() => go('product')}>
-            <div className="task-body"><span className="small" style={{ color: 'var(--c-product)', fontWeight: 600 }}>Product thinking · {productTopic.section}</span><div className="task-label">{productTopic.name}</div></div>
-          </button>
-        )}
+        ))}
         {reading && (
           <button className="task" style={{ textAlign: 'left', width: '100%' }} onClick={() => go('library')}>
             <div className="task-body">

@@ -1,42 +1,98 @@
 // ---------------------------------------------------------------------------
 // Daily task templates (0 = Sunday ... 6 = Saturday)
 // ---------------------------------------------------------------------------
+import { CURRICULUM } from './curriculum.js'
+
 const STUDY_BLOCKS = {
-  sd: { id: 'sd', label: 'System design: read + one-page summary', detail: 'This week’s module. Write it in your own words with a rough diagram.', xp: 30, track: 'sd', mins: 60 },
-  ai: { id: 'ai', label: 'AI/ML: study or project work', detail: 'This week’s module: course videos, reading, or building.', xp: 30, track: 'ai', mins: 60 },
-  ops: { id: 'ops', label: 'DevOps: study + hands-on lab', detail: 'This week’s module. Build something small: a workflow, a Dockerfile, a migration.', xp: 30, track: 'ops', mins: 60 },
-  product: { id: 'product', label: 'Product thinking: one idea, applied', detail: 'This week’s module. Apply it to something you built or use every day.', xp: 25, track: 'product', mins: 30 },
-  fund: { id: 'fund', label: 'Fundamentals: one topic, deep', detail: 'This week’s module. Explain it out loud when you are done.', xp: 30, track: 'fund', mins: 45 },
+  sd: { label: 'System design: read + one-page summary', detail: 'This week’s module. Write it in your own words with a rough diagram.', xp: 30, mins: 60 },
+  ai: { label: 'AI/ML: study or project work', detail: 'This week’s module: course videos, reading, or building.', xp: 30, mins: 60 },
+  ops: { label: 'DevOps: study + hands-on lab', detail: 'This week’s module. Build something small: a workflow, a Dockerfile, a migration.', xp: 30, mins: 60 },
+  product: { label: 'Product thinking: one idea, applied', detail: 'This week’s module. Apply it to something you built or use every day.', xp: 25, mins: 30 },
+  fund: { label: 'Fundamentals: one topic, deep', detail: 'This week’s module. Explain it out loud when you are done.', xp: 30, mins: 45 },
+  lang: { label: 'Language mastery: one topic + code', detail: 'This week’s module in your language. Write code, not just notes.', xp: 30, mins: 45 },
+  lld: { label: 'LLD: design or machine-coding practice', detail: 'This week’s module. Draw the classes, then write the code.', xp: 30, mins: 60 },
+  sql: { label: 'SQL: 3 problems + one concept', detail: 'This week’s module. Time each problem.', xp: 25, mins: 40 },
+  fe: { label: 'Frontend: build or study', detail: 'This week’s module. Build the small thing in the practice line.', xp: 30, mins: 60 },
+  mobile: { label: 'Mobile: build or study', detail: 'This week’s module on your platform.', xp: 30, mins: 60 },
+  career: { label: 'Getting hired: one concrete step', detail: 'This week’s module: resume, referrals, research or practice rounds.', xp: 25, mins: 30 },
 }
 const DSA_TASK = { id: 'dsa', label: 'Solve today’s DSA problems', detail: 'Pattern of the week. 25 min per problem, then study the solution and mark it for review.', xp: 40, track: 'dsa', mins: 60 }
 const TALK_TASK = { id: 'talk', label: 'Explain one solution out loud', detail: 'Two minutes, as if to an interviewer. Communication is a skill too.', xp: 10, track: 'dsa', mins: 5 }
 
-/** Daily tasks for a date, built from the areas in your plan (0 = Sunday ... 6 = Saturday). */
-export const tasksForDay = (date, tracks = ['dsa', 'sd', 'ai', 'ops', 'product', 'fund']) => {
-  const has = (t) => tracks.includes(t)
-  const others = ['sd', 'ai', 'ops', 'product', 'fund'].filter(has)
-  const d = date.getDay()
-  if (d === 6) {
-    const project = has('ai') && has('ops') ? 'AI project or DevOps lab (2 h)' : has('ai') ? 'AI project work (2 h)' : has('ops') ? 'DevOps hands-on lab (2 h)' : 'CS fundamentals deep dive (2 h)'
-    return [
-      has('dsa') && { id: 'timed', label: 'Timed DSA: 3 problems in 90 minutes', detail: 'A LeetCode contest counts too.', xp: 60, track: 'dsa', mins: 90 },
-      has('sd') && { id: 'design', label: 'Design one full system out loud', detail: 'Requirements → estimates → API → data model → high level → deep dive.', xp: 60, track: 'sd', mins: 90 },
-      { id: 'deep', label: project, detail: 'Pick whichever is behind.', xp: 50, track: has('ai') ? 'ai' : has('ops') ? 'ops' : 'fund', mins: 120 },
-    ].filter(Boolean)
+const hoursOf = (t) => (CURRICULUM[t] || []).reduce((s, m) => s + (m.hours || 0), 0)
+
+/** Spread a week's weekday study slots across areas in proportion to their content. */
+function weekSlots(others, slots) {
+  if (!others.length) return []
+  const total = others.reduce((s, t) => s + hoursOf(t), 0) || 1
+  const raw = Object.fromEntries(others.map((t) => [t, (hoursOf(t) / total) * slots]))
+  const quota = Object.fromEntries(others.map((t) => [t, Math.floor(raw[t])]))
+  let used = Object.values(quota).reduce((a, b) => a + b, 0)
+  for (const t of [...others].sort((a, b) => (raw[b] % 1) - (raw[a] % 1))) { if (used >= slots) break; quota[t]++; used++ }
+  // Every area gets at least one slot a week when there is room; take it from the largest.
+  for (const t of others) {
+    if (quota[t] === 0 && others.length <= slots) {
+      const big = [...others].sort((a, b) => quota[b] - quota[a])[0]
+      quota[big]--; quota[t]++
+    }
   }
-  if (d === 0) {
-    return [
+  // Interleave so the same area is spread through the week.
+  const seq = []
+  const given = Object.fromEntries(others.map((t) => [t, 0]))
+  for (let i = 0; i < slots; i++) {
+    const open = others.filter((x) => given[x] < quota[x])
+    if (!open.length) break
+    const t = open.sort((a, b) => given[a] / quota[a] - given[b] / quota[b] || others.indexOf(a) - others.indexOf(b))[0]
+    seq.push(t); given[t]++
+  }
+  return seq
+}
+
+const scale = (task, factor) => ({ ...task, mins: Math.max(5, Math.round((task.mins * factor) / 5) * 5) })
+
+/**
+ * Daily tasks for a date, built from the areas in your plan (0 = Sunday ... 6 = Saturday).
+ * weeklyHours scales the suggested minutes (22 h/week is the base schedule).
+ */
+export const tasksForDay = (date, tracks = ['dsa', 'sd', 'ai', 'ops', 'product', 'fund'], weeklyHours = 22) => {
+  const has = (t) => tracks.includes(t)
+  const factor = weeklyHours / 22
+  const others = ['sd', 'lang', 'lld', 'sql', 'fe', 'mobile', 'ai', 'ops', 'product', 'fund', 'career'].filter(has)
+  const d = date.getDay()
+  let list
+  if (d === 6) {
+    const design = has('sd') ? { id: 'design', label: 'Design one full system out loud', detail: 'Requirements → estimates → API → data model → high level → deep dive.', track: 'sd' }
+      : has('fe') ? { id: 'design', label: 'Frontend system design out loud', detail: 'Requirements → component architecture → data & state → API → performance.', track: 'fe' }
+      : has('mobile') ? { id: 'design', label: 'Mobile system design out loud', detail: 'Requirements → client architecture → API → offline & sync → deep dive.', track: 'mobile' }
+      : null
+    const build = has('lld') ? { label: 'Machine coding: build a working app in 90 min', track: 'lld' }
+      : has('fe') ? { label: 'Build a UI component from scratch (90 min)', track: 'fe' }
+      : has('ai') && has('ops') ? { label: 'AI project or DevOps lab (2 h)', track: 'ai' }
+      : has('ai') ? { label: 'AI project work (2 h)', track: 'ai' }
+      : has('ops') ? { label: 'DevOps hands-on lab (2 h)', track: 'ops' }
+      : has('mobile') ? { label: 'Build on your mobile app (2 h)', track: 'mobile' }
+      : { label: 'Deep dive on your weakest area (2 h)', track: others[0] || 'plan' }
+    list = [
+      has('dsa') && { id: 'timed', label: 'Timed DSA: 3 problems in 90 minutes', detail: 'A LeetCode contest counts too.', xp: 60, track: 'dsa', mins: 90 },
+      design && { ...design, xp: 60, mins: 90 },
+      { id: 'deep', ...build, detail: 'The hands-on part of this week’s modules.', xp: 50, mins: 120 },
+    ].filter(Boolean)
+  } else if (d === 0) {
+    list = [
       has('dsa') && { id: 'resolve', label: 'Re-solve problems you got stuck on', detail: 'Clear your review queue first.', xp: 40, track: 'dsa', mins: 60 },
-      { id: 'review', label: 'Weekly review', detail: 'Write what went well and what is weak on the Roadmap page.', xp: 30, track: 'plan', mins: 60 },
+      { id: 'review', label: 'Weekly review', detail: 'Write what went well and what is weak on the Roadmap page. Every 2–3 weeks, run the Readiness check.', xp: 30, track: 'plan', mins: 60 },
       { id: 'catchup', label: 'Catch-up (1 h)', detail: 'Whatever is behind. Then take the rest of the day off.', xp: 30, track: has('fund') ? 'fund' : 'plan', mins: 60 },
       { id: 'current', label: 'Stay current: 20 minutes of reading', detail: 'Skim one newsletter or the Tech Radar (Library → Stay current). Note one thing worth trying.', xp: 15, track: 'current', mins: 20 },
     ].filter(Boolean)
+  } else {
+    // Weekdays: DSA every day, plus study blocks shared across your other areas by how much content each has.
+    const per = has('dsa') ? 2 : 3
+    const seq = weekSlots(others, per * 5)
+    const today = seq.slice((d - 1) * per, d * per)
+    const blocks = today.map((t, i) => ({ id: today.indexOf(t) === i ? t : `${t}-${i}`, track: t, ...STUDY_BLOCKS[t] }))
+    list = [...(has('dsa') ? [DSA_TASK] : []), ...blocks, ...(has('dsa') ? [TALK_TASK] : [])]
   }
-  // Weekdays: DSA every day, plus two study blocks that rotate through your other areas.
-  const per = has('dsa') ? 2 : 3
-  const blocks = []
-  for (let i = 0; i < Math.min(per, others.length); i++) blocks.push(STUDY_BLOCKS[others[((d - 1) * per + i) % others.length]])
-  return [...(has('dsa') ? [DSA_TASK] : []), ...blocks, ...(has('dsa') ? [TALK_TASK] : [])]
+  return factor === 1 ? list : list.map((t) => scale(t, factor))
 }
 
 // ---------------------------------------------------------------------------
@@ -111,6 +167,26 @@ export const RESOURCES = [
   { id: 'lean-analytics', title: 'Lean Analytics', author: 'Alistair Croll & Benjamin Yoskovitz', type: 'Book', track: 'product', must: false, url: 'https://leananalyticsbook.com/', unit: 'chapters', total: 30, why: 'Which metric matters at which stage, with benchmarks by business model.' },
   { id: 'kohavi', title: 'Trustworthy Online Controlled Experiments', author: 'Kohavi, Tang & Xu', type: 'Book', track: 'product', must: false, url: 'https://experimentguide.com/', unit: 'chapters', total: 23, why: 'The A/B testing book, from the people who ran experimentation at Microsoft, Google and LinkedIn.' },
 
+  // LLD & machine coding
+  { id: 'hfdp', title: 'Head First Design Patterns (2nd ed.)', author: 'Eric Freeman & Elisabeth Robson', type: 'Book', track: 'lld', must: true, url: 'https://www.oreilly.com/library/view/head-first-design/9781492077992/', unit: 'chapters', total: 14, why: 'The friendliest way to learn the patterns that show up in LLD rounds.' },
+  { id: 'awesome-lld', title: 'awesome-low-level-design', author: 'Ashish Pratap Singh', type: 'Site', track: 'lld', must: true, url: 'https://github.com/ashishps1/awesome-low-level-design', unit: 'percent', total: 100, why: 'Curated LLD concepts and interview problems with solutions in several languages.' },
+  // SQL
+  { id: 'sql-50', title: 'LeetCode SQL 50', author: 'LeetCode', type: 'Site', track: 'sql', must: true, url: 'https://leetcode.com/studyplan/top-sql-50/', unit: 'problems', total: 50, why: 'The standard interview SQL set, from basic joins to window functions.' },
+  { id: 'datalemur', title: 'DataLemur', author: 'Nick Singh', type: 'Site', track: 'sql', must: false, url: 'https://datalemur.com/', unit: 'problems', total: 30, why: 'Real company SQL questions with a free tutorial.' },
+  { id: 'index-luke', title: 'Use The Index, Luke', author: 'Markus Winand', type: 'Site', track: 'sql', must: false, url: 'https://use-the-index-luke.com/', unit: 'chapters', total: 8, why: 'Free. SQL indexing and tuning explained for developers.' },
+  // Frontend
+  { id: 'js-info', title: 'The Modern JavaScript Tutorial', author: 'javascript.info', type: 'Site', track: 'fe', must: true, url: 'https://javascript.info/', unit: 'percent', total: 100, why: 'Free, thorough JavaScript from basics to advanced: closures, prototypes, promises, event loop.' },
+  { id: 'gfe', title: 'GreatFrontEnd', author: 'GreatFrontEnd', type: 'Site', track: 'fe', must: true, url: 'https://www.greatfrontend.com/', unit: 'problems', total: 60, why: 'Frontend interview questions: JS utilities, UI components and frontend system design.' },
+  { id: 'react-learn', title: 'react.dev: Learn React', author: 'React team', type: 'Course', track: 'fe', must: true, url: 'https://react.dev/learn', unit: 'percent', total: 100, why: 'The official React docs, rewritten around hooks and modern patterns.' },
+  { id: 'webdev-learn', title: 'web.dev: Learn', author: 'Google Chrome team', type: 'Course', track: 'fe', must: false, url: 'https://web.dev/learn', unit: 'percent', total: 100, why: 'Free courses on CSS, performance, accessibility and more.' },
+  // Mobile
+  { id: 'mobile-sdi', title: 'Mobile System Design Interview', author: 'Manuel Vicente Vivo (ByteByteGo)', type: 'Book', track: 'mobile', must: true, url: 'https://bytebytego.com/courses/mobile-system-design-interview/introduction', unit: 'chapters', total: 12, why: 'A framework and worked mobile design questions from a staff mobile architect.' },
+  { id: 'android-arch', title: 'Android: guide to app architecture', author: 'Google', type: 'Site', track: 'mobile', must: false, url: 'https://developer.android.com/topic/architecture', unit: 'percent', total: 100, why: 'Official layered architecture and offline-first guidance (useful for iOS too).' },
+  // Getting hired
+  { id: 'tih-resume', title: 'Tech Interview Handbook: resume', author: 'Yangshun Tay', type: 'Site', track: 'career', must: true, url: 'https://www.techinterviewhandbook.org/resume/', unit: 'percent', total: 100, why: 'How to write a software engineer resume that gets interviews.' },
+  { id: 'levels', title: 'Levels.fyi', author: 'Levels.fyi', type: 'Site', track: 'career', must: false, url: 'https://www.levels.fyi/', unit: 'percent', total: 100, why: 'Compensation and leveling data for negotiating with numbers.' },
+  { id: 'haseeb-negotiate', title: 'Ten rules for negotiating a job offer', author: 'Haseeb Qureshi', type: 'Article', track: 'career', must: true, url: 'https://haseebq.com/my-ten-rules-for-negotiating-a-job-offer/', unit: 'percent', total: 100, why: 'The classic, practical guide to negotiating as an engineer.' },
+
   // Trending technologies (checked November 2026)
   { id: 'claude-code-bp', title: 'Best practices for agentic coding (Claude Code docs)', tech: 'AI coding agents', author: 'Anthropic', type: 'Site', track: 'trend', must: false, url: 'https://code.claude.com/docs/en/best-practices', unit: 'percent', total: 100, why: 'Two thirds of developers now use coding agents (Stack Overflow 2026). Learn to plan, give context, review and test what they write.' },
   { id: 'beyond-vibe', title: 'Beyond Vibe Coding', tech: 'AI coding agents', author: 'Addy Osmani', type: 'Book', track: 'trend', must: false, url: 'https://www.oreilly.com/library/view/beyond-vibe-coding/9798341634749/', unit: 'chapters', total: 11, why: 'AI-assisted engineering done properly: the “70% problem”, prompting, security and keeping code maintainable.' },
@@ -151,6 +227,12 @@ export const TRACKS = {
   fund: { name: 'Fundamentals', color: 'var(--c-fund)' },
   ops: { name: 'DevOps', color: 'var(--c-ops)' },
   product: { name: 'Product thinking', color: 'var(--c-product)' },
+  lang: { name: 'Language', color: 'var(--c-lang)' },
+  lld: { name: 'LLD & machine coding', color: 'var(--c-lld)' },
+  sql: { name: 'SQL', color: 'var(--c-sql)' },
+  fe: { name: 'Frontend', color: 'var(--c-fe)' },
+  mobile: { name: 'Mobile', color: 'var(--c-mobile)' },
+  career: { name: 'Getting hired', color: 'var(--c-career)' },
   craft: { name: 'Developer craft', color: 'var(--c-craft)' },
   current: { name: 'Stay current', color: 'var(--c-current)' },
   trend: { name: 'Trending tech', color: 'var(--c-trend)' },

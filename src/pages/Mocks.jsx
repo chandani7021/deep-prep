@@ -3,7 +3,7 @@ import { Plus, Trash2 } from 'lucide-react'
 import { celebrate, dayKey, prettyDate, useStore } from '../store.jsx'
 import { Stars } from '../components/ui.jsx'
 
-const TYPES = ['Coding', 'System design', 'ML / AI', 'Behavioral', 'Real interview']
+const TYPES = ['Coding', 'System design', 'LLD / machine coding', 'Frontend', 'Mobile', 'SQL', 'AI-assisted coding', 'ML / AI', 'Behavioral', 'Real interview']
 
 export default function Mocks() {
   const { state, act } = useStore()

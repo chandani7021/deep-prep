@@ -24,6 +24,12 @@
   --c-product: #a7e86f;
   --c-craft: #f2d17a;
   --c-current: #8fd0ff;
+  --c-lang: #ff9ecb;
+  --c-lld: #7fe3d3;
+  --c-sql: #c3b1ff;
+  --c-fe: #ffd36e;
+  --c-mobile: #9be7ff;
+  --c-career: #ffa8a8;
   --font-display: 'Bricolage Grotesque', 'Segoe UI', system-ui, sans-serif;
   --font-body: 'IBM Plex Sans', 'Segoe UI', system-ui, -apple-system, sans-serif;
   color-scheme: dark;
@@ -434,3 +440,14 @@ details.notes summary { cursor: pointer; color: var(--muted); font-size: 13px; }
 .elink:hover .link-fix { opacity: 1; }
 .link-edit { display: grid; gap: 6px; width: 100%; max-width: 520px; padding: 8px; border: 1px solid var(--line-strong); border-radius: 10px; background: var(--abyss); }
 .link-edit .small.dim { overflow-wrap: anywhere; }
+
+/* ---------------------------------------------------------------- roles, load, readiness */
+.role-card { display: grid; gap: 4px; text-align: left; padding: 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--deep-2); color: var(--text); cursor: pointer; font: inherit; }
+.role-card:hover { border-color: var(--line-strong); }
+.role-card.on { border-color: var(--signal); background: rgba(61, 139, 253, 0.14); }
+.plan-load { display: grid; gap: 8px; padding: 12px 14px; border: 1px solid; border-radius: 12px; background: var(--abyss); }
+.load-bar { height: 8px; border-radius: 999px; background: var(--deep-2); overflow: hidden; }
+.load-bar > span { display: block; height: 100%; border-radius: inherit; }
+.load-areas { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 4px 12px; }
+.bench { display: flex; gap: 16px; flex-wrap: wrap; padding: 16px 18px; border-top: 1px solid var(--line); }
+.bench:first-child { border-top: 0; }

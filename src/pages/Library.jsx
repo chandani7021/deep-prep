@@ -5,7 +5,7 @@ import { RESOURCES, TRACKS } from '../data/content.js'
 import { celebrate, useStore } from '../store.jsx'
 import { Progress } from '../components/ui.jsx'
 
-const FILTERS = [['all', 'All'], ['craft', 'Developer craft'], ['current', 'Stay current'], ['dsa', 'DSA'], ['sd', 'System design'], ['ai', 'AI/ML'], ['ops', 'DevOps'], ['product', 'Product'], ['fund', 'Fundamentals'], ['trend', 'Trending tech']]
+const FILTERS = [['all', 'All'], ['craft', 'Developer craft'], ['current', 'Stay current'], ['trend', 'Trending tech'], ['dsa', 'DSA'], ['sd', 'System design'], ['lld', 'LLD & machine coding'], ['sql', 'SQL'], ['fe', 'Frontend'], ['mobile', 'Mobile'], ['ai', 'AI/ML'], ['ops', 'DevOps'], ['product', 'Product'], ['fund', 'Fundamentals'], ['career', 'Getting hired']]
 
 export default function Library() {
   const { state } = useStore()
@@ -23,9 +23,9 @@ export default function Library() {
       </div>
 
       <div className="row">
-        <div className="seg" role="group" aria-label="Track" style={{ flexWrap: 'wrap' }}>
-          {FILTERS.map(([id, name]) => <button key={id} aria-pressed={track === id} onClick={() => setTrack(id)}>{name}</button>)}
-        </div>
+        <select className="select" style={{ width: 'auto' }} value={track} onChange={(e) => setTrack(e.target.value)} aria-label="Show resources for">
+          {FILTERS.map(([id, name]) => <option key={id} value={id}>{name} ({id === 'all' ? RESOURCES.length + state.customResources.length : [...RESOURCES, ...state.customResources].filter((r) => r.track === id).length})</option>)}
+        </select>
         <div className="seg" role="group" aria-label="Priority">
           <button aria-pressed={!mustOnly} onClick={() => setMustOnly(false)}>Everything</button>
           <button aria-pressed={mustOnly} onClick={() => setMustOnly(true)}>Must only</button>

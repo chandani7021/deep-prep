@@ -6,7 +6,9 @@ Every bit of work takes you deeper: XP is measured in metres, levels go from the
 ## What's inside
 
 - **Today**: day X of your plan, daily tasks (weekday / Saturday / Sunday schedules), next problems picked for you, review queue, 90-day dive log, reflection.
-- **Roadmap**: plan setup (length, start date, areas), phases, and a week-by-week plan where each area's module has topics, practice and the best resources.
+- **Roadmap**: plan setup with role presets (backend, frontend, full-stack, mobile, ML/AI, DevOps/SRE, generalist), hours per week, interview language, a load check that says whether the plan fits (and the length that would), start date, areas, phases, and a week-by-week plan where each area's module has topics, practice and the best resources.
+- **Readiness**: concrete benchmarks to run every 2 weeks (unseen mediums in 25 min, a new design in 45 min, machine coding in 90 min, mock pass rate…), with signals from your data.
+- **Gap areas**: Language mastery (Python, Java, JS/TS, Go, C++, Kotlin, Swift), LLD & machine coding, SQL, Frontend, Mobile, and Getting hired (resume, referrals, interview formats, debugging and AI-assisted rounds, negotiation). The sidebar shows only the areas in your plan.
 - **DevOps & delivery**: CI/CD, Docker, deployment strategies, Kubernetes, IaC/GitOps, database migrations and operations, observability, supply-chain security, plus a ship-it project.
 - **DSA**: 19 patterns, ~150 LeetCode problems (NeetCode 150 ones tagged `NC`), spaced repetition (3 → 6 → 12 → 24 days → mastered), notes per problem, add your own problems.
 - **System design**: interview framework, 20 building blocks, 16 practice designs (including AI/ML systems) with session counts and confidence ratings.

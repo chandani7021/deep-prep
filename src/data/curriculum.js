@@ -14,7 +14,9 @@
 //   hours           rough effort at the default pace
 // ---------------------------------------------------------------------------
 
-export const AREAS = [
+import { EXTRA_AREAS, EXTRA_CURRICULUM, EXTRA_REVIEW, ROLES } from './areas-extra.js'
+
+const CORE_AREAS = [
   { id: 'dsa', name: 'DSA', blurb: 'Patterns, ~150 LeetCode problems, spaced repetition' },
   { id: 'sd', name: 'System design', blurb: 'Building blocks, then 16 full designs out loud' },
   { id: 'ai', name: 'AI/ML', blurb: 'Classic ML → deep learning → LLM apps, plus a RAG project' },
@@ -22,9 +24,14 @@ export const AREAS = [
   { id: 'product', name: 'Product thinking', blurb: 'Users, metrics, experiments, prioritization, product sense' },
   { id: 'fund', name: 'Fundamentals', blurb: 'Networking, OS, databases, code design, behavioral' },
 ]
+const ORDER = ['dsa', 'sd', 'lang', 'lld', 'sql', 'fe', 'mobile', 'ai', 'ops', 'product', 'fund', 'career']
+export const AREAS = ORDER.map((id) => [...CORE_AREAS, ...EXTRA_AREAS].find((a) => a.id === id))
 export const AREA_IDS = AREAS.map((a) => a.id)
+/** Areas a brand-new plan starts with (the generalist preset). */
+export const DEFAULT_TRACKS = ROLES.find((r) => r.id === 'generalist').tracks
+export { ROLES }
 
-export const CURRICULUM = {
+const CORE_CURRICULUM = {
   // ------------------------------------------------------------------ DSA
   dsa: [
     {
@@ -110,6 +117,13 @@ export const CURRICULUM = {
       topics: ['Sort by start, merge / insert intervals', 'Meeting rooms with a heap', 'XOR tricks and bit counting', 'Matrix rotation and spiral order', 'Dijkstra with a heap; Prim / Kruskal for MST'],
       practice: 'Solve the Intervals, Math & Bits and Weighted Graphs problems, then clear your review queue.',
       links: [['CP-Algorithms: Dijkstra', 'https://cp-algorithms.com/graph/dijkstra.html']],
+    },
+    {
+      id: 'dsa-13', title: 'Stretch: volume for top companies', hours: 15,
+      outcome: 'Handle unseen hards and company-style twists. Needed mainly for the most selective companies.',
+      topics: ['Extend to the NeetCode 250 list', 'Weekly LeetCode contests for speed under pressure', 'Company-tagged problems for your target companies', 'Advanced topics: segment trees, monotonic deque, bitmask DP (only if targeting top-tier)'],
+      practice: 'Add 50–100 problems beyond this list (use “Add your own problem” on the DSA page) and do 4 contests.',
+      links: [['NeetCode practice (NeetCode 250)', 'https://neetcode.io/practice'], ['LeetCode contests', 'https://leetcode.com/contest/']],
     },
   ],
 
@@ -560,6 +574,9 @@ const REVIEW = {
   fund: { title: 'Final review: rest & confidence', outcome: 'Rested and confident.', topics: ['Skim fundamentals notes', 'Read your STAR stories once', 'Sleep'], practice: 'You did the work.', links: [] },
 }
 
+export const CURRICULUM = { ...CORE_CURRICULUM, ...EXTRA_CURRICULUM }
+Object.assign(REVIEW, EXTRA_REVIEW)
+
 // ---------------------------------------------------------------------------
 // Plan building
 // ---------------------------------------------------------------------------
@@ -580,10 +597,14 @@ const cache = new Map()
  * Spread every selected area's modules across the plan.
  * Returns { days, weeks, totalWeeks, phases, firstWeek: {moduleId|patternId|designId|milestoneId: week} }
  */
-export function buildPlan(planDays = 90, tracks = AREA_IDS) {
+/** Modules only included when you opt in (Plan setup → stretch DSA). */
+export const STRETCH_MODULES = ['dsa-13']
+const modulesFor = (track, stretch) => CURRICULUM[track].filter((m) => stretch || !STRETCH_MODULES.includes(m.id))
+
+export function buildPlan(planDays = 90, tracks = DEFAULT_TRACKS, stretch = false) {
   const days = clampDays(planDays)
   const selected = AREA_IDS.filter((id) => tracks.includes(id))
-  const key = `${days}|${selected.join(',')}`
+  const key = `${days}|${selected.join(',')}|${stretch}`
   if (cache.has(key)) return cache.get(key)
 
   const totalWeeks = Math.ceil(days / 7)
@@ -593,7 +614,7 @@ export function buildPlan(planDays = 90, tracks = AREA_IDS) {
   const firstWeek = {}
 
   for (const track of selected) {
-    const mods = CURRICULUM[track]
+    const mods = modulesFor(track, stretch)
     const M = mods.length
     // How many weeks each module spans (>= 1 when there are more weeks than modules).
     for (let w = 1; w <= contentWeeks; w++) {
@@ -651,4 +672,42 @@ function lastWeekOf(i, M, W) {
   return 1
 }
 
-export const planFor = (profile) => buildPlan(profile?.planDays, profile?.tracks || AREA_IDS)
+export const planFor = (profile) => buildPlan(profile?.planDays, profile?.tracks || DEFAULT_TRACKS, !!profile?.dsaStretch)
+
+// ---------------------------------------------------------------------------
+// Load check: does the content fit the time you have?
+// DSA gets about 35% of your weekly hours (the daily problems); the other areas
+// share the rest in proportion to how much content each has.
+// ---------------------------------------------------------------------------
+export const DEFAULT_WEEKLY_HOURS = 22
+export const WEEKLY_HOURS_OPTIONS = [8, 12, 16, 22, 30, 40]
+
+export const areaHours = (track, stretch = false) => (CURRICULUM[track] ? modulesFor(track, stretch) : []).reduce((s, m) => s + (m.hours || 0), 0)
+
+export function planLoad(profile) {
+  const tracks = AREA_IDS.filter((t) => (profile?.tracks || DEFAULT_TRACKS).includes(t))
+  const weekly = profile?.weeklyHours || DEFAULT_WEEKLY_HOURS
+  const days = clampDays(profile?.planDays)
+  const hasDsa = tracks.includes('dsa')
+  const others = tracks.filter((t) => t !== 'dsa')
+  const dsaShare = hasDsa ? (others.length ? 0.35 : 1) : 0
+  const stretch = !!profile?.dsaStretch
+  const dsaHours = hasDsa ? areaHours('dsa', stretch) : 0
+  const otherHours = others.reduce((s, t) => s + areaHours(t), 0)
+  const weeksNeeded = Math.max(
+    dsaShare ? dsaHours / (weekly * dsaShare) : 0,
+    others.length ? otherHours / (weekly * (1 - dsaShare)) : 0,
+  )
+  const neededDays = Math.ceil(weeksNeeded * 7)
+  const recommendedDays = clampDays(Math.ceil(neededDays / 7) * 7 + (neededDays >= 35 ? 7 : 0)) // + a review week
+  const contentHours = dsaHours + otherHours
+  const availableHours = Math.round((days / 7) * weekly)
+  const ratio = neededDays / days
+  const status = ratio <= 1.05 ? 'fits' : ratio <= 1.3 ? 'tight' : 'overloaded'
+  const perArea = tracks.map((t) => {
+    const h = areaHours(t, stretch)
+    const share = t === 'dsa' ? dsaShare : (1 - dsaShare) * (h / (otherHours || 1))
+    return { track: t, hours: h, weeklyHours: +(weekly * share).toFixed(1) }
+  })
+  return { tracks, weekly, days, contentHours, availableHours, neededDays, recommendedDays, ratio, status, perArea }
+}
